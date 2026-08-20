@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { PublicLayoutWrapper } from "@/components/layout/PublicLayoutWrapper";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -46,12 +44,9 @@ export default function RootLayout({
   return (
     <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} h-full antialiased scroll-smooth`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground overflow-x-hidden" suppressHydrationWarning>
-        <Navbar />
-        <main className="flex-grow">
+        <PublicLayoutWrapper>
           {children}
-        </main>
-        <Footer />
-        <WhatsAppButton />
+        </PublicLayoutWrapper>
       </body>
     </html>
   );

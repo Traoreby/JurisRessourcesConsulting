@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 
 interface LogoProps {
   className?: string;
@@ -11,7 +10,7 @@ export function Logo({ className = "", variant = "default", showText = true }: L
   const logoSrc = "/logo/logo.png";
 
   return (
-    <Link href="/" className={`flex items-center gap-3 md:gap-5 ${className}`}>
+    <a href="/" className={`flex items-center gap-3 md:gap-5 ${className}`}>
       <div className="relative h-16 w-16 md:h-24 md:w-24 shrink-0 transition-transform duration-300 hover:scale-[1.02]">
         <Image 
           src={logoSrc} 
@@ -33,6 +32,6 @@ export function Logo({ className = "", variant = "default", showText = true }: L
           </span>
         </div>
       )}
-    </Link>
+    </a>
   );
 }
