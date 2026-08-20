@@ -5,6 +5,15 @@ import Image from "next/image";
 import { ArrowRight, Scale, Calculator, Landmark, Users, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 
+type Partner = {
+  name: string;
+  logo: string;
+  description?: string;
+  url?: string;
+};
+
+const partners: Partner[] = [];
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -184,6 +193,47 @@ export default function Home() {
               </div>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Partenariats (Préparation) */}
+      <section className="py-24 bg-slate-50/80 border-t border-slate-100">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-bold uppercase tracking-widest text-accent mb-4 block">Réseau</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-4 tracking-tight">Nos partenariats</h2>
+            <p className="text-slate-600 max-w-3xl mx-auto text-lg font-medium leading-relaxed">
+              Nous construisons des partenariats durables avec des acteurs engagés pour créer davantage d'opportunités et apporter une réelle valeur à nos clients.
+            </p>
+          </motion.div>
+
+          {partners.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-white p-12 md:p-16 rounded-3xl shadow-sm border border-slate-100 text-center relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-primary/[0.02]" />
+              <div className="relative z-10 max-w-2xl mx-auto">
+                <h3 className="text-2xl font-bold text-primary mb-4">Nos partenaires</h3>
+                <p className="text-slate-600 text-lg leading-relaxed">
+                  Découvrez prochainement les organisations et acteurs avec lesquels Juris Ressources Consulting développe des collaborations.
+                </p>
+              </div>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {/* Grille des partenaires à venir */}
+            </div>
+          )}
         </div>
       </section>
 

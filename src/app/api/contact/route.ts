@@ -83,33 +83,33 @@ export async function POST(request: NextRequest) {
       subject: `Nouvelle demande de consultation — ${serviceLabel}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:8px;">
-          <h2 style="color:#0F172A;border-bottom:3px solid #C5A880;padding-bottom:12px;margin-bottom:20px;">
+          <h2 style="color:#1E293B;border-bottom:3px solid #C5A880;padding-bottom:12px;margin-bottom:20px;">
             Nouvelle demande de consultation
           </h2>
           <table style="width:100%;border-collapse:collapse;">
             <tr style="border-bottom:1px solid #f1f5f9;">
-              <td style="padding:10px 8px;font-weight:bold;color:#0F172A;width:170px;vertical-align:top;">Nom :</td>
+              <td style="padding:10px 8px;font-weight:bold;color:#1E293B;width:170px;vertical-align:top;">Nom :</td>
               <td style="padding:10px 8px;color:#475569;">${esc(fullName)}</td>
             </tr>
             <tr style="border-bottom:1px solid #f1f5f9;">
-              <td style="padding:10px 8px;font-weight:bold;color:#0F172A;vertical-align:top;">Téléphone :</td>
+              <td style="padding:10px 8px;font-weight:bold;color:#1E293B;vertical-align:top;">Téléphone :</td>
               <td style="padding:10px 8px;color:#475569;">${esc(phone)}</td>
             </tr>
             <tr style="border-bottom:1px solid #f1f5f9;">
-              <td style="padding:10px 8px;font-weight:bold;color:#0F172A;vertical-align:top;">Email :</td>
+              <td style="padding:10px 8px;font-weight:bold;color:#1E293B;vertical-align:top;">Email :</td>
               <td style="padding:10px 8px;color:#475569;">${esc(email)}</td>
             </tr>
             <tr style="border-bottom:1px solid #f1f5f9;">
-              <td style="padding:10px 8px;font-weight:bold;color:#0F172A;vertical-align:top;">Service concerné :</td>
+              <td style="padding:10px 8px;font-weight:bold;color:#1E293B;vertical-align:top;">Service concerné :</td>
               <td style="padding:10px 8px;color:#475569;">${serviceLabel}</td>
             </tr>
             <tr style="border-bottom:1px solid #f1f5f9;">
-              <td style="padding:10px 8px;font-weight:bold;color:#0F172A;vertical-align:top;">Objet :</td>
+              <td style="padding:10px 8px;font-weight:bold;color:#1E293B;vertical-align:top;">Objet :</td>
               <td style="padding:10px 8px;color:#475569;">${esc(subject)}</td>
             </tr>
           </table>
           <div style="margin-top:16px;padding:16px;background:#f8fafc;border-left:4px solid #C5A880;border-radius:4px;">
-            <p style="font-weight:bold;color:#0F172A;margin:0 0 8px;">Message :</p>
+            <p style="font-weight:bold;color:#1E293B;margin:0 0 8px;">Message :</p>
             <p style="color:#475569;margin:0;white-space:pre-wrap;">${esc(message)}</p>
           </div>
           <p style="margin-top:24px;font-size:12px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:12px;">
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
       subject: "Confirmation de votre demande — Juris Ressources Consulting",
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:8px;">
-          <h2 style="color:#0F172A;border-bottom:3px solid #C5A880;padding-bottom:12px;margin-bottom:20px;">
+          <h2 style="color:#1E293B;border-bottom:3px solid #C5A880;padding-bottom:12px;margin-bottom:20px;">
             Votre demande a bien été reçue
           </h2>
           <p style="color:#475569;font-size:15px;">Bonjour ${esc(fullName)},</p>
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
             <strong>Juris Ressources Consulting</strong> concernant : <em>${serviceLabel}</em>.
           </p>
           <div style="margin:20px 0;padding:16px;background:#f8fafc;border-left:4px solid #C5A880;border-radius:4px;">
-            <p style="margin:0 0 6px;color:#0F172A;font-weight:bold;">Récapitulatif de votre demande</p>
+            <p style="margin:0 0 6px;color:#1E293B;font-weight:bold;">Récapitulatif de votre demande</p>
             <p style="margin:4px 0;color:#475569;font-size:14px;"><strong>Service :</strong> ${serviceLabel}</p>
             <p style="margin:4px 0;color:#475569;font-size:14px;"><strong>Objet :</strong> ${esc(subject)}</p>
           </div>
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
             <strong>+225 27 31 94 88 63</strong> — <strong>+225 07 49 43 61 70</strong>
           </p>
           <p style="color:#475569;font-size:15px;margin-top:24px;">Cordialement,</p>
-          <p style="color:#0F172A;font-weight:bold;font-size:15px;margin:0;">
+          <p style="color:#1E293B;font-weight:bold;font-size:15px;margin:0;">
             Juris Ressources Consulting
           </p>
           <p style="color:#C5A880;font-size:13px;margin:4px 0 0;">
