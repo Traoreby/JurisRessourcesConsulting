@@ -11,6 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://jurisressources.com"),
   title: "Juris Ressources Consulting | Cabinet Juridique, Fiscal, Comptable & RH",
   description: "Cabinet d'assistance et accompagnement juridique, comptable, fiscal et en ressources humaines basé à Grand-Bassam, Côte d'Ivoire.",
   keywords: "cabinet juridique Grand-Bassam, cabinet comptable Grand-Bassam, conseil fiscal Côte d'Ivoire, ressources humaines Côte d'Ivoire, Juris Ressources Consulting, JRC",

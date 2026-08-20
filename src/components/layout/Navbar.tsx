@@ -51,8 +51,8 @@ export function Navbar() {
         </nav>
         
         <div className="hidden lg:flex items-center gap-4">
-          <Link href="/consultation" className="px-6 py-3 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary-hover transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-            Demander une consultation
+          <Link href="/services" className="px-6 py-3 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary-hover transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">
+            Découvrez nos offres
           </Link>
         </div>
         
@@ -76,11 +76,11 @@ export function Navbar() {
               </Link>
             ))}
             <Link 
-              href="/consultation" 
-              className="px-4 py-4 mt-4 bg-primary text-white text-center rounded-lg font-bold shadow-md hover:bg-primary-hover"
+              href="/services" 
+              className="px-4 py-4 mt-4 bg-primary text-white text-center rounded-lg font-bold shadow-md hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-accent"
               onClick={() => setIsOpen(false)}
             >
-              Demander une consultation
+              Découvrez nos offres
             </Link>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Scale, Calculator, Landmark, Users, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -9,7 +10,16 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-primary text-white py-32 md:py-40 overflow-hidden">
-        <div className="absolute inset-0 opacity-15 bg-[url('https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center" />
+        <div className="absolute inset-0 opacity-15">
+          <Image 
+            src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2000&auto=format&fit=crop" 
+            alt="Hero Background" 
+            fill 
+            className="object-cover object-center" 
+            priority
+            unoptimized 
+          />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/85 to-primary" />
         
         <div className="container relative z-10 mx-auto px-4 max-w-5xl text-center">
@@ -29,7 +39,7 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="text-lg md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto font-medium"
           >
-            Juris Ressources Consulting (JRC) vous accompagne avec expertise en conseil juridique, fiscalité, comptabilité et gestion des ressources humaines.
+            Cabinet basé à Grand-Bassam, Côte d'Ivoire, Juris Ressources Consulting (JRC) vous accompagne avec expertise en conseil juridique, fiscalité, comptabilité et gestion des ressources humaines.
           </motion.p>
           
           <motion.div 
@@ -38,11 +48,11 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.4 }}
             className="flex flex-col sm:flex-row justify-center items-center gap-4"
           >
-            <Link href="/consultation" className="px-8 py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-              Demander une consultation
+            <Link href="/services" className="px-8 py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent-hover transition-all w-full sm:w-auto shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
+              Découvrez nos offres
             </Link>
-            <Link href="/services" className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-all w-full sm:w-auto border border-white/20 backdrop-blur-md transform hover:-translate-y-1">
-              Découvrir nos services
+            <Link href="/formations" className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-all w-full sm:w-auto border border-white/20 backdrop-blur-md transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
+              Découvrez nos formations
             </Link>
           </motion.div>
         </div>
@@ -61,7 +71,7 @@ export default function Home() {
             <span className="text-sm font-bold uppercase tracking-widest text-accent mb-4 block">À propos de JRC</span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-6 tracking-tight">Un cabinet de confiance à votre écoute</h2>
             <p className="text-xl text-slate-600 mb-10 leading-relaxed font-medium">
-              Créé pour répondre aux défis complexes des entreprises modernes, Juris Ressources Consulting met à votre disposition une équipe d'experts dévoués. Notre approche pluridisciplinaire nous permet d'offrir des solutions sur mesure adaptées au contexte ivoirien et international.
+              Basé à Grand-Bassam, Côte d'Ivoire, et créé pour répondre aux défis complexes des entreprises modernes, Juris Ressources Consulting met à votre disposition une équipe d'experts dévoués. Notre approche pluridisciplinaire nous permet d'offrir des solutions sur mesure adaptées au contexte ivoirien et international.
             </p>
             <Link href="/cabinet" className="inline-flex items-center gap-3 text-primary font-bold hover:text-accent transition-colors group text-lg">
               En savoir plus sur JRC <ArrowRight size={22} className="transform group-hover:translate-x-2 transition-transform" />
@@ -87,26 +97,27 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { title: "Assistance Juridique", icon: Scale, desc: "Rédaction d'actes, création d'entreprises, contentieux et conseil juridique." },
-              { title: "Accompagnement Comptable", icon: Calculator, desc: "Tenue comptable, bilans, déclarations et optimisation." },
-              { title: "Conseil Fiscal", icon: Landmark, desc: "Audit fiscal, assistance à contrôle et ingénierie fiscale." },
-              { title: "Ressources Humaines", icon: Users, desc: "Recrutement, paie, contrats et gestion des conflits." }
+              { title: "Assistance Juridique", icon: Scale, desc: "Rédaction d'actes, création d'entreprises, contentieux et conseil juridique.", link: "/services#juridique" },
+              { title: "Accompagnement Comptable", icon: Calculator, desc: "Tenue comptable, bilans, déclarations et optimisation.", link: "/services#comptabilite" },
+              { title: "Conseil Fiscal", icon: Landmark, desc: "Audit fiscal, assistance à contrôle et ingénierie fiscale.", link: "/services#fiscalite" },
+              { title: "Ressources Humaines", icon: Users, desc: "Recrutement, paie, contrats et gestion des conflits.", link: "/services#ressources-humaines" }
             ].map((service, idx) => (
-              <motion.div 
-                key={idx} 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                whileHover={{ y: -10 }}
-                className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-premium transition-all group"
-              >
-                <div className="w-16 h-16 bg-primary/5 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-accent transition-colors duration-300">
-                  <service.icon size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-primary mb-3">{service.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{service.desc}</p>
-              </motion.div>
+              <Link href={service.link} key={idx} className="block focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 rounded-2xl">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  whileHover={{ y: -10 }}
+                  className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-premium transition-all group h-full cursor-pointer"
+                >
+                  <div className="w-16 h-16 bg-primary/5 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-accent transition-colors duration-300">
+                    <service.icon size={32} />
+                  </div>
+                  <h3 className="text-xl font-bold text-primary mb-3">{service.title}</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">{service.desc}</p>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </div>
@@ -158,16 +169,18 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               className="lg:w-1/2 relative"
             >
-              <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-premium-hover">
-                <img 
+              <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-premium-hover relative">
+                <Image 
                   src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1600&auto=format&fit=crop" 
                   alt="Équipe en réunion" 
-                  className="object-cover w-full h-full"
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               </div>
               <div className="absolute -bottom-8 -left-8 bg-primary text-white p-6 rounded-2xl shadow-lg border border-white/10 hidden md:block">
-                <p className="text-4xl font-extrabold text-accent mb-1">+500</p>
-                <p className="text-sm font-semibold">Dossiers traités avec succès</p>
+                <p className="text-3xl font-extrabold text-accent mb-1">Expertise</p>
+                <p className="text-sm font-semibold">Au service de votre réussite</p>
               </div>
             </motion.div>
           </div>
@@ -176,7 +189,15 @@ export default function Home() {
 
       {/* CTA Final */}
       <section className="py-28 bg-primary text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 bg-[url('https://images.unsplash.com/photo-1450101499163-c8848c66cb85?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center"></div>
+        <div className="absolute inset-0 opacity-5">
+          <Image 
+            src="https://images.unsplash.com/photo-1450101499163-c8848c66cb85?q=80&w=2000&auto=format&fit=crop" 
+            alt="CTA Background" 
+            fill 
+            className="object-cover object-center"
+            unoptimized 
+          />
+        </div>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -188,8 +209,8 @@ export default function Home() {
           <p className="text-slate-300 mb-10 text-xl font-medium">
             Nos experts sont à votre disposition pour analyser vos besoins et vous proposer des solutions concrètes.
           </p>
-          <Link href="/consultation" className="inline-flex px-10 py-5 bg-accent text-primary font-extrabold rounded-xl hover:bg-accent-hover transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-1 text-lg">
-            Demander une consultation dès aujourd'hui
+          <Link href="/services" className="inline-flex px-10 py-5 bg-accent text-primary font-extrabold rounded-xl hover:bg-accent-hover transition-all shadow-lg hover:shadow-2xl transform hover:-translate-y-1 text-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
+            Découvrez nos offres
           </Link>
         </motion.div>
       </section>

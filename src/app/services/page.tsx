@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Scale, Calculator, Landmark, Users, ArrowRight } from "lucide-react";
+import { Scale, Calculator, Receipt, Users, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const services = [
@@ -9,71 +9,111 @@ const services = [
     id: "juridique",
     title: "Assistance Juridique",
     icon: Scale,
-    desc: "Nous sécurisons vos opérations et vous accompagnons dans toutes vos démarches juridiques, de la création à la restructuration.",
-    prestations: ["Création d'entreprises", "Rédaction de contrats et actes", "Secrétariat juridique", "Assistance au contentieux"]
+    desc: "Nous sécurisons vos opérations et vous accompagnons dans toutes vos démarches juridiques, de la création à la restructuration, dans le respect du cadre juridique applicable en Côte d'Ivoire et dans l'espace OHADA.",
+    prestations: [
+      "Création d'entreprises",
+      "Rédaction de contrats et actes",
+      "Secrétariat juridique",
+      "Assistance au contentieux",
+    ],
+    ariaLabel: "Demander une consultation en assistance juridique",
   },
   {
-    id: "comptable",
+    id: "comptabilite",
     title: "Accompagnement Comptable",
     icon: Calculator,
-    desc: "Une gestion comptable rigoureuse pour vous permettre de vous concentrer sur le cœur de votre métier.",
-    prestations: ["Tenue de la comptabilité", "Établissement des états financiers", "Tableaux de bord de gestion", "Audit comptable"]
+    desc: "Une gestion comptable rigoureuse, conforme aux normes du référentiel SYSCOHADA, pour vous permettre de vous concentrer sur le cœur de votre métier en toute sérénité.",
+    prestations: [
+      "Tenue de la comptabilité",
+      "Établissement des états financiers",
+      "Tableaux de bord de gestion",
+      "Audit comptable",
+    ],
+    ariaLabel: "Demander une consultation en accompagnement comptable",
   },
   {
-    id: "fiscal",
+    id: "fiscalite",
     title: "Conseil Fiscal",
-    icon: Landmark,
-    desc: "Optimisation de votre charge fiscale tout en garantissant le respect strict de la réglementation en vigueur.",
-    prestations: ["Déclarations fiscales", "Assistance en cas de contrôle", "Audit fiscal", "Ingénierie fiscale"]
+    icon: Receipt,
+    desc: "Optimisation de votre charge fiscale tout en garantissant le respect strict de la réglementation fiscale ivoirienne en vigueur. Nous vous accompagnons dans vos obligations déclaratives et vos relations avec la DGI.",
+    prestations: [
+      "Déclarations fiscales",
+      "Assistance en cas de contrôle",
+      "Audit fiscal",
+      "Ingénierie fiscale",
+    ],
+    ariaLabel: "Demander une consultation en conseil fiscal",
   },
   {
-    id: "rh",
+    id: "ressources-humaines",
     title: "Ressources Humaines",
     icon: Users,
-    desc: "Valorisation de votre capital humain par une gestion moderne et conforme au droit du travail.",
-    prestations: ["Recrutement", "Gestion de la paie", "Rédaction des contrats de travail", "Gestion des conflits sociaux"]
-  }
+    desc: "Valorisation de votre capital humain par une gestion moderne et conforme au Code du Travail ivoirien, y compris les obligations liées aux déclarations sociales auprès de la CNPS.",
+    prestations: [
+      "Recrutement",
+      "Gestion de la paie",
+      "Rédaction des contrats de travail",
+      "Gestion des conflits sociaux",
+    ],
+    ariaLabel: "Demander une consultation en ressources humaines",
+  },
 ];
 
 export default function ServicesPage() {
   return (
     <div className="py-20 bg-background min-h-screen">
       <div className="container mx-auto px-4 max-w-5xl">
-        <motion.div 
+
+        {/* Header */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary mb-6 tracking-tight">Nos Domaines d'Expertise</h1>
-          <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
-            Une offre de services complète, pensée pour répondre aux exigences de chaque étape du développement de votre entreprise.
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary mb-6 tracking-tight">
+            Nos Domaines d&apos;Expertise
+          </h1>
+          <p className="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto font-medium">
+            Juris Ressources Consulting accompagne les entreprises et professionnels à Grand-Bassam et en Côte d&apos;Ivoire dans leurs besoins juridiques, comptables, fiscaux et en ressources humaines.
           </p>
         </motion.div>
 
+        {/* Services */}
         <div className="space-y-16">
           {services.map((service, index) => (
-            <motion.div 
-              key={service.id} 
-              id={service.id} 
+            <motion.div
+              key={service.id}
+              id={service.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6 }}
               className="bg-white rounded-3xl shadow-premium border border-slate-100 overflow-hidden flex flex-col md:flex-row scroll-mt-32 group hover:shadow-premium-hover transition-all duration-500"
             >
-              <div className={`md:w-2/5 bg-primary text-white p-10 flex flex-col justify-center items-center text-center relative overflow-hidden ${index % 2 !== 0 ? 'md:order-last' : ''}`}>
-                <div className="absolute inset-0 bg-accent/5 transform scale-150 rotate-45 group-hover:rotate-90 transition-transform duration-1000"></div>
+              {/* Panneau coloré */}
+              <div
+                className={`md:w-2/5 bg-primary text-white p-10 flex flex-col justify-center items-center text-center relative overflow-hidden ${
+                  index % 2 !== 0 ? "md:order-last" : ""
+                }`}
+              >
+                <div className="absolute inset-0 bg-accent/5 transform scale-150 rotate-45 group-hover:rotate-90 transition-transform duration-1000" />
                 <service.icon size={64} className="text-accent mb-6 relative z-10" />
                 <h2 className="text-3xl font-bold mb-6 relative z-10">{service.title}</h2>
-                <Link href="/consultation" className="mt-4 px-8 py-3 bg-transparent border-2 border-accent text-accent hover:bg-accent hover:text-primary transition-colors font-bold rounded-lg relative z-10">
+                <Link
+                  href="/consultation"
+                  aria-label={service.ariaLabel}
+                  className="mt-4 px-8 py-3 bg-transparent border-2 border-accent text-accent hover:bg-accent hover:text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary transition-colors font-bold rounded-lg relative z-10"
+                >
                   Consulter
                 </Link>
               </div>
+
+              {/* Panneau texte */}
               <div className="md:w-3/5 p-10 md:p-14">
                 <p className="text-slate-600 text-xl mb-10 leading-relaxed">{service.desc}</p>
                 <h3 className="font-bold text-primary text-lg mb-6 flex items-center gap-2">
-                  <span className="w-8 h-1 bg-accent rounded-full"></span> Nos prestations incluent :
+                  <span className="w-8 h-1 bg-accent rounded-full" /> Nos prestations incluent :
                 </h3>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {service.prestations.map((prest, i) => (
@@ -87,6 +127,44 @@ export default function ServicesPage() {
             </motion.div>
           ))}
         </div>
+
+        {/* CTA Final */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-24 bg-primary text-white p-10 md:p-14 rounded-3xl shadow-premium-hover text-center relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-accent/5 rounded-3xl" />
+          <div className="relative z-10">
+            <span className="text-sm font-bold uppercase tracking-widest text-accent mb-4 block">
+              Besoin d&apos;un accompagnement ?
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">
+              Parlons de vos besoins professionnels
+            </h2>
+            <p className="text-slate-300 text-lg mb-8 max-w-xl mx-auto font-medium">
+              Nos équipes sont à votre disposition pour comprendre votre situation et vous orienter vers l&apos;accompagnement le plus adapté.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <Link
+                href="/consultation"
+                className="px-8 py-4 bg-accent text-primary font-bold rounded-lg hover:bg-accent-hover transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
+              >
+                Demander une consultation
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 text-slate-300 hover:text-accent transition-colors font-semibold text-sm group focus:outline-none focus:underline"
+              >
+                Nous contacter
+                <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+
       </div>
     </div>
   );
