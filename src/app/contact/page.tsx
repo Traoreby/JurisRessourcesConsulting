@@ -162,7 +162,7 @@ export default function ContactPage() {
             <h2 className="text-2xl font-bold text-primary tracking-tight">
               Nous trouver à Grand-Bassam
             </h2>
-            <p className="text-slate-500 text-sm mt-2">
+            <p className="text-slate-600 text-sm mt-2">
               Maison Mak, derrière la pharmacie Mockey-ville — Grand-Bassam, Côte d&apos;Ivoire
             </p>
           </div>

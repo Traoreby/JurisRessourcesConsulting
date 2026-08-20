@@ -92,7 +92,7 @@ export default function BlogPage() {
                     {article.title}
                   </Link>
                 </h3>
-                <div className="flex items-center gap-6 text-sm text-slate-500 mb-6 font-medium">
+                <div className="flex items-center gap-6 text-sm text-slate-600 mb-6 font-medium">
                   <div className="flex items-center gap-2"><Calendar size={16} className="text-accent" aria-hidden="true" /> {article.date}</div>
                   <div className="flex items-center gap-2"><User size={16} className="text-accent" aria-hidden="true" /> {article.author}</div>
                 </div>

@@ -60,7 +60,7 @@ export default function CabinetPage() {
           </p>
 
           {/* Badge institutionnel discret */}
-          <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-4 py-2 rounded-full text-sm text-slate-500 font-medium mb-10">
+          <div className="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-4 py-2 rounded-full text-sm text-slate-600 font-medium mb-10">
             <span className="w-2 h-2 bg-accent rounded-full" />
             SARLU &bull; Fondée en 2025 &bull; Grand-Bassam, Côte d'Ivoire
           </div>

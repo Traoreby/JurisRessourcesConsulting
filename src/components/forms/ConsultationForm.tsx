@@ -313,7 +313,7 @@ function ConsultationFormInner({ title = "Demander une consultation" }: Consulta
           </button>
         </div>
 
-        <p className="text-xs font-medium text-slate-500 text-center">
+        <p className="text-xs font-medium text-slate-600 text-center">
           Vos données personnelles sont traitées de manière strictement confidentielle.
         </p>
       </form>
