@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { AdminProvider } from "@/components/admin/AdminContext";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminAuthGuard } from "@/components/admin/AdminAuthGuard";
@@ -12,21 +13,28 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
+
   return (
     <AdminProvider>
       <AdminAuthGuard>
-        <div
-          className="flex h-screen bg-slate-50 overflow-hidden"
-          style={{ fontFamily: "var(--font-sans), sans-serif" }}
-        >
-          {/* Sidebar */}
-          <AdminSidebar />
+        {isLoginPage ? (
+          children
+        ) : (
+          <div
+            className="flex h-screen bg-slate-50 overflow-hidden"
+            style={{ fontFamily: "var(--font-sans), sans-serif" }}
+          >
+            {/* Sidebar */}
+            <AdminSidebar />
 
-          {/* Main content */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <main className="flex-1 overflow-y-auto">{children}</main>
+            {/* Main content */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <main className="flex-1 overflow-y-auto">{children}</main>
+            </div>
           </div>
-        </div>
+        )}
       </AdminAuthGuard>
     </AdminProvider>
   );
