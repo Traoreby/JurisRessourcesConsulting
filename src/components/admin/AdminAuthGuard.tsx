@@ -25,14 +25,18 @@ export function AdminAuthGuard({ children }: { children: ReactNode }) {
 
       if (session && !isLoginPage) {
         // Vérifier si l'utilisateur a un profil valide
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
           .single();
         
+        if (profileError) {
+          console.error("Profile query error:", profileError);
+        }
+
         if (!profile) {
-          setError("Accès refusé. Votre compte utilisateur n'a pas de profil associé.");
+          setError(`Accès refusé. Votre compte utilisateur n'a pas de profil associé. Détails: ${profileError ? profileError.message : 'Aucun'}`);
           setIsChecking(false);
           return;
         }
