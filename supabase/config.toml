@@ -1,0 +1,11 @@
+project_id = "vifdefirttszypaspeuc"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]

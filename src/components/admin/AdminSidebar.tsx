@@ -13,10 +13,13 @@ import {
   MessageSquare,
   Settings,
   LogOut,
+  Users,
   X,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { useAdmin } from "@/components/admin/AdminContext";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -27,18 +30,40 @@ const navItems = [
   { href: "/admin/actualites", label: "Actualités", icon: Newspaper },
   { href: "/admin/publicites", label: "Publicités", icon: Megaphone },
   { href: "/admin/demandes", label: "Demandes", icon: MessageSquare },
+];
+
+const superAdminOnlyItems = [
   { href: "/admin/parametres", label: "Paramètres", icon: Settings },
+  { href: "/admin/utilisateurs", label: "Utilisateurs", icon: Users },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { sidebarOpen, setSidebarOpen } = useAdmin();
+  const [role, setRole] = useState<string | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function getRole() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        if (profile) setRole(profile.role);
+      }
+    }
+    getRole();
+  }, [supabase]);
 
   const close = () => setSidebarOpen(false);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("admin_authenticated");
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
     router.push("/admin/login");
   };
 
@@ -82,7 +107,7 @@ export function AdminSidebar() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4" aria-label="Navigation admin">
           <ul className="space-y-0.5 px-3">
-            {navItems.map((item) => {
+            {[...navItems, ...(role === "SUPER_ADMIN" ? superAdminOnlyItems : [])].map((item) => {
               const isActive =
                 pathname === item.href ||
                 (item.href !== "/admin/dashboard" && pathname.startsWith(item.href + "/"));

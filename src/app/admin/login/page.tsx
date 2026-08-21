@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 // Page de connexion admin.
 // Structure uniquement — l'authentification réelle sera branchée via Supabase Auth.
@@ -12,13 +12,29 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [notice, setNotice] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClient();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulation d'une session temporaire avant intégration Supabase Auth
-    sessionStorage.setItem("admin_authenticated", "true");
+    setLoading(true);
+    setError(null);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      setLoading(false);
+      setError(signInError.message);
+      return;
+    }
+
+    // Le rafraîchissement force la vérification côté serveur avec Supabase
+    router.refresh();
     router.push("/admin/dashboard");
   };
 
@@ -50,20 +66,19 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          {/* Notice Supabase */}
-          {notice && (
+          {/* Error Notice */}
+          {error && (
             <div
               role="alert"
-              className="mb-6 flex items-start gap-3 bg-accent/10 border border-accent/30 rounded-xl p-4 text-sm text-primary"
+              className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800"
             >
               <AlertCircle
                 size={18}
-                className="text-accent shrink-0 mt-0.5"
+                className="text-red-500 shrink-0 mt-0.5"
                 aria-hidden="true"
               />
               <span>
-                <strong>Authentification non encore activée.</strong> Elle sera
-                connectée à Supabase lors de la prochaine étape.
+                <strong>Erreur :</strong> {error}
               </span>
             </div>
           )}
@@ -141,19 +156,20 @@ export default function AdminLoginPage() {
 
             <button
               type="submit"
-              className="w-full py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 text-sm"
+              disabled={loading}
+              className="w-full py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Se connecter
+              {loading ? "Connexion en cours..." : "Se connecter"}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <Link
+            <a
               href="/"
               className="text-sm text-slate-500 hover:text-primary transition-colors focus:outline-none focus:underline"
             >
               ← Retour au site public
-            </Link>
+            </a>
           </div>
         </div>
 
