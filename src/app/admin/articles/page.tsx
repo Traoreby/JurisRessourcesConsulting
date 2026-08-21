@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, Edit2, Trash2, Eye } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { mockArticles } from "@/lib/admin/mock-data";
 import type { ArticleStatut } from "@/types/admin";
 
 const STATUTS: { value: ArticleStatut | "tous"; label: string }[] = [
@@ -18,8 +18,31 @@ const STATUTS: { value: ArticleStatut | "tous"; label: string }[] = [
 export default function ArticlesPage() {
   const [search, setSearch] = useState("");
   const [statut, setStatut] = useState<ArticleStatut | "tous">("tous");
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
-  const filtered = mockArticles.filter((a) => {
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('articles').select('*').order('created_at', { ascending: false });
+    if (!error && data) {
+      setArticles(data);
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet article ?")) {
+      await supabase.from('articles').delete().eq('id', id);
+      fetchArticles();
+    }
+  };
+
+  const filtered = articles.filter((a) => {
     const matchSearch =
       a.titre.toLowerCase().includes(search.toLowerCase()) ||
       a.categorie.toLowerCase().includes(search.toLowerCase());
@@ -91,7 +114,13 @@ export default function ArticlesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="p-8 text-center text-slate-400 text-sm">
+                      Chargement des articles...
+                    </td>
+                  </tr>
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-8 text-center text-slate-400 text-sm">
                       Aucun article trouvé.
@@ -110,7 +139,7 @@ export default function ArticlesPage() {
                         </span>
                       </td>
                       <td className="p-4 text-slate-500 text-xs hidden lg:table-cell">
-                        {article.updatedAt}
+                        {new Date(article.updated_at || article.created_at).toLocaleDateString("fr-FR")}
                       </td>
                       <td className="p-4">
                         <StatusBadge statut={article.statut} />
@@ -127,7 +156,7 @@ export default function ArticlesPage() {
                           <button
                             className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-300"
                             aria-label={`Supprimer ${article.titre}`}
-                            onClick={() => alert("Suppression disponible après connexion à Supabase.")}
+                            onClick={() => handleDelete(article.id)}
                           >
                             <Trash2 size={15} aria-hidden="true" />
                           </button>

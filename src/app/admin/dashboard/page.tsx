@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import {
   FileText,
@@ -8,18 +6,53 @@ import {
   Handshake,
   MessageSquare,
   Plus,
-  TrendingUp,
   Clock,
   ChevronRight,
 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatCard } from "@/components/admin/StatCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { mockStats, mockDemandes, mockArticles } from "@/lib/admin/mock-data";
+import { createClient } from "@/lib/supabase/server";
 
-export default function DashboardPage() {
-  const recentDemandes = mockDemandes.slice(0, 4);
-  const recentArticles = mockArticles.slice(0, 3);
+export default async function DashboardPage() {
+  const supabase = await createClient();
+
+  // Récupération des statistiques
+  const [{ count: articlesPublies }, { count: articlesBrouillon }, { count: formations }, { count: services }, { count: partenaires }, { count: demandesNouvelles }] = await Promise.all([
+    supabase.from("articles").select("id", { count: "exact", head: true }).eq("statut", "publié"),
+    supabase.from("articles").select("id", { count: "exact", head: true }).eq("statut", "brouillon"),
+    supabase.from("formations").select("id", { count: "exact", head: true }),
+    supabase.from("services").select("id", { count: "exact", head: true }),
+    supabase.from("partners").select("id", { count: "exact", head: true }),
+    supabase.from("demandes").select("id", { count: "exact", head: true }).eq("statut", "Nouveau"),
+  ]);
+
+  // Récupération des dernières demandes
+  const { data: recentDemandesData } = await supabase
+    .from("demandes")
+    .select("id, nom, objet, message, created_at, statut")
+    .order("created_at", { ascending: false })
+    .limit(4);
+
+  // Récupération des derniers articles
+  const { data: recentArticlesData } = await supabase
+    .from("articles")
+    .select("id, titre, categorie, updated_at, statut")
+    .order("updated_at", { ascending: false })
+    .limit(3);
+
+  const recentDemandes = recentDemandesData || [];
+  const recentArticles = recentArticlesData || [];
+
+  const formatDate = (isoString: string) => {
+    return new Date(isoString).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  };
+
+
 
   return (
     <div className="flex flex-col min-h-full">
@@ -38,15 +71,7 @@ export default function DashboardPage() {
       />
 
       <div className="flex-1 p-4 md:p-6 space-y-8">
-        {/* Notice temporaire */}
-        <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 text-sm text-primary flex items-start gap-3">
-          <TrendingUp size={18} className="text-accent shrink-0 mt-0.5" aria-hidden="true" />
-          <span>
-            <strong>Données de démonstration.</strong> Les statistiques
-            ci-dessous seront alimentées en temps réel depuis Supabase après
-            connexion.
-          </span>
-        </div>
+
 
         {/* Stats */}
         <section aria-labelledby="stats-heading">
@@ -56,34 +81,34 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
             <StatCard
               title="Articles publiés"
-              value={mockStats.articlesPublies}
+              value={articlesPublies || 0}
               icon={<FileText size={20} />}
             />
             <StatCard
               title="Brouillons"
-              value={mockStats.articlesBrouillon}
+              value={articlesBrouillon || 0}
               icon={<FileText size={20} />}
             />
             <StatCard
               title="Formations"
-              value={mockStats.formations}
+              value={formations || 0}
               icon={<GraduationCap size={20} />}
             />
             <StatCard
               title="Services"
-              value={mockStats.services}
+              value={services || 0}
               icon={<Briefcase size={20} />}
             />
             <StatCard
               title="Partenaires"
-              value={mockStats.partenaires}
+              value={partenaires || 0}
               icon={<Handshake size={20} />}
             />
             <StatCard
               title="Nouvelles demandes"
-              value={mockStats.demandesNouvelles}
+              value={demandesNouvelles || 0}
               icon={<MessageSquare size={20} />}
-              highlight={mockStats.demandesNouvelles > 0}
+              highlight={(demandesNouvelles || 0) > 0}
               description="À traiter"
             />
           </div>
@@ -112,8 +137,8 @@ export default function DashboardPage() {
                 <div key={d.id} className="p-4 flex items-start justify-between gap-4 hover:bg-slate-50/50 transition-colors">
                   <div className="min-w-0">
                     <p className="font-semibold text-primary text-sm truncate">{d.nom}</p>
-                    <p className="text-xs text-slate-500 truncate mt-0.5">{d.objet ?? d.message.slice(0, 50)}</p>
-                    <p className="text-xs text-slate-400 mt-1">{d.date}</p>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">{d.objet ?? d.message?.slice(0, 50)}</p>
+                    <p className="text-xs text-slate-400 mt-1">{formatDate(d.created_at)}</p>
                   </div>
                   <StatusBadge statut={d.statut} />
                 </div>
@@ -147,7 +172,7 @@ export default function DashboardPage() {
                   <div className="min-w-0">
                     <p className="font-semibold text-primary text-sm truncate">{a.titre}</p>
                     <p className="text-xs text-slate-500 mt-0.5">{a.categorie}</p>
-                    <p className="text-xs text-slate-400 mt-1">{a.updatedAt}</p>
+                    <p className="text-xs text-slate-400 mt-1">{formatDate(a.updated_at)}</p>
                   </div>
                   <StatusBadge statut={a.statut} />
                 </Link>

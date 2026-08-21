@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 const CATEGORIES = ["Comptabilité", "Fiscalité", "Droit du Travail", "Juridique", "Ressources Humaines", "Actualité"];
 const STATUTS = [
@@ -13,7 +15,11 @@ const STATUTS = [
 ];
 
 export default function NouvelArticlePage() {
-  const [saved, setSaved] = useState(false);
+  const supabase = createClient();
+  const router = useRouter();
+  const [file, setFile] = useState<File | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     titre: "",
     slug: "",
@@ -42,11 +48,56 @@ export default function NouvelArticlePage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: supabase.from('articles').insert(form)
-    setSaved(true);
-    setTimeout(() => setSaved(false), 4000);
+    setLoading(true);
+    setErrorMsg("");
+    
+    try {
+      let imageUrl = form.image;
+      
+      // Upload image if file is selected
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `articles/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('public-assets')
+          .upload(filePath, file);
+          
+        if (uploadError) throw new Error("Erreur lors de l'upload de l'image");
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('public-assets')
+          .getPublicUrl(filePath);
+          
+        imageUrl = publicUrl;
+      }
+      
+      const { error: insertError } = await supabase.from('articles').insert({
+        titre: form.titre,
+        slug: form.slug,
+        extrait: form.extrait,
+        contenu: form.contenu,
+        categorie: form.categorie,
+        auteur: form.auteur,
+        statut: form.statut,
+        image: imageUrl
+      });
+      
+      if (insertError) {
+        if (insertError.code === '23505') {
+          throw new Error("Ce slug existe déjà. Veuillez le modifier.");
+        }
+        throw new Error(insertError.message);
+      }
+      
+      router.push('/admin/articles');
+    } catch (err: any) {
+      setErrorMsg(err.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,11 +117,11 @@ export default function NouvelArticlePage() {
       />
 
       <div className="flex-1 p-4 md:p-6">
-        {saved && (
-          <div role="alert" className="mb-6 flex items-start gap-3 bg-accent/10 border border-accent/30 rounded-xl p-4 text-sm text-primary">
-            <AlertCircle size={18} className="text-accent shrink-0 mt-0.5" aria-hidden="true" />
+        {errorMsg && (
+          <div role="alert" className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+            <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" aria-hidden="true" />
             <span>
-              <strong>Sauvegarde simulée.</strong> La connexion à Supabase permettra la sauvegarde réelle.
+              <strong>Erreur :</strong> {errorMsg}
             </span>
           </div>
         )}
@@ -198,22 +249,22 @@ export default function NouvelArticlePage() {
                   </label>
                   <input
                     id="art-image"
-                    type="url"
-                    value={form.image}
-                    onChange={(e) => handleChange("image", e.target.value)}
-                    placeholder="https://..."
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary placeholder:text-slate-400 bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/5 file:text-primary hover:file:bg-primary/10"
                   />
-                  <p className="text-xs text-slate-400 mt-1">L'upload via Supabase Storage sera disponible à la prochaine étape.</p>
+                  <p className="text-xs text-slate-400 mt-1">Sélectionnez une image à uploader sur Supabase Storage.</p>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 text-sm"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 text-sm disabled:opacity-50"
               >
                 <Save size={16} aria-hidden="true" />
-                Sauvegarder
+                {loading ? "Sauvegarde..." : "Sauvegarder"}
               </button>
             </div>
           </div>

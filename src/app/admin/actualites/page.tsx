@@ -1,18 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { Edit2, Trash2, Plus, AlertCircle } from "lucide-react";
+import { Edit2, Trash2, Plus, AlertCircle, Calendar } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 
-// Actu list is empty as requested.
-const mockActualites: any[] = [];
+import { createClient } from "@/lib/supabase/client";
+import { useEffect } from "react";
+import Link from "next/link";
 
 export default function ActualitesAdminPage() {
-  const [notice, setNotice] = useState(false);
-  const showNotice = () => {
-    setNotice(true);
-    setTimeout(() => setNotice(false), 4000);
+  const [actualites, setActualites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    fetchActualites();
+  }, []);
+
+  const fetchActualites = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('actualites').select('*').order('date', { ascending: false });
+    if (!error && data) {
+      setActualites(data);
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette actualité ?")) {
+      await supabase.from('actualites').delete().eq('id', id);
+      fetchActualites();
+    }
   };
 
   return (
@@ -21,24 +40,18 @@ export default function ActualitesAdminPage() {
         title="Actualités"
         description="Gérez les brèves et publications"
         actions={
-          <button
-            onClick={showNotice}
+          <Link
+            href="/admin/actualites/nouveau"
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
           >
             <Plus size={16} aria-hidden="true" />
             Nouvelle actualité
-          </button>
+          </Link>
         }
       />
 
       <div className="flex-1 p-4 md:p-6 space-y-6">
-        {notice && (
-          <div role="alert" className="flex items-start gap-3 bg-accent/10 border border-accent/30 rounded-xl p-4 text-sm text-primary">
-            <AlertCircle size={18} className="text-accent shrink-0 mt-0.5" aria-hidden="true" />
-            <span><strong>Fonctionnalité disponible après connexion à Supabase.</strong></span>
-          </div>
-        )}
-
+        
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -51,14 +64,16 @@ export default function ActualitesAdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {mockActualites.length === 0 ? (
+                {loading ? (
+                  <tr><td colSpan={4} className="p-10 text-center text-slate-400">Chargement des actualités...</td></tr>
+                ) : actualites.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-slate-400 text-sm">
                       Aucune actualité pour le moment.
                     </td>
                   </tr>
                 ) : (
-                  mockActualites.map((actu) => (
+                  actualites.map((actu) => (
                     <tr key={actu.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="p-4">
                         <p className="font-semibold text-primary">{actu.titre}</p>
@@ -69,10 +84,10 @@ export default function ActualitesAdminPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-1 justify-end">
-                          <button onClick={showNotice} className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 rounded-lg">
+                          <Link href={`/admin/actualites/${actu.id}`} className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 rounded-lg">
                             <Edit2 size={15} />
-                          </button>
-                          <button onClick={showNotice} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
+                          </Link>
+                          <button onClick={() => handleDelete(actu.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
                             <Trash2 size={15} />
                           </button>
                         </div>

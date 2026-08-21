@@ -4,34 +4,30 @@ import Link from "next/link";
 import { Clock, Users as UsersIcon, BookOpen, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
-const formations = [
-  {
-    id: 1,
-    title: "Maîtrise de la paie et des déclarations sociales",
-    category: "Ressources Humaines",
-    duration: "3 jours",
-    audience: "Gestionnaires RH, Comptables",
-    desc: "Une formation pratique pour maîtriser le traitement de la paie et les obligations sociales en Côte d'Ivoire.",
-  },
-  {
-    id: 2,
-    title: "Optimisation fiscale des entreprises",
-    category: "Fiscalité",
-    duration: "2 jours",
-    audience: "Chefs d'entreprise, DAF",
-    desc: "Comprendre les leviers d'optimisation fiscale tout en restant en stricte conformité avec la loi.",
-  },
-  {
-    id: 3,
-    title: "Les fondamentaux du droit du travail",
-    category: "Juridique",
-    duration: "2 jours",
-    audience: "Managers, Entrepreneurs",
-    desc: "Sécurisez vos relations de travail en maîtrisant les règles essentielles du droit social ivoirien.",
-  }
-];
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function FormationsPage() {
+  const [formations, setFormations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchFormations = async () => {
+      const { data, error } = await supabase
+        .from('formations')
+        .select('*')
+        .eq('statut', 'actif')
+        .order('ordre', { ascending: true });
+        
+      if (!error && data) {
+        setFormations(data);
+      }
+      setLoading(false);
+    };
+    
+    fetchFormations();
+  }, [supabase]);
   return (
     <div className="py-20 bg-background min-h-screen">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -67,7 +63,11 @@ export default function FormationsPage() {
 
         {/* Grille de formations */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
-          {formations.map((form, idx) => (
+          {loading ? (
+            <div className="col-span-full py-20 text-center text-slate-500">Chargement des formations...</div>
+          ) : formations.length === 0 ? (
+            <div className="col-span-full py-20 text-center text-slate-500">Aucune formation disponible pour le moment.</div>
+          ) : formations.map((form, idx) => (
             <motion.div 
               key={form.id} 
               initial={{ opacity: 0, y: 30 }}
@@ -78,26 +78,26 @@ export default function FormationsPage() {
               className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col hover:shadow-premium transition-all duration-300 group"
             >
               <div className="bg-primary/5 p-5 border-b border-slate-100 group-hover:bg-primary transition-colors duration-300">
-                <span className="text-xs font-bold uppercase tracking-widest text-accent group-hover:text-white transition-colors">{form.category}</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-accent group-hover:text-white transition-colors">{form.categorie}</span>
               </div>
               <div className="p-8 flex-grow flex flex-col">
-                <h3 className="text-2xl font-bold text-primary mb-4 leading-tight">{form.title}</h3>
-                <p className="text-slate-600 text-base mb-8 flex-grow leading-relaxed">{form.desc}</p>
+                <h3 className="text-2xl font-bold text-primary mb-4 leading-tight">{form.titre}</h3>
+                <p className="text-slate-600 text-base mb-8 flex-grow leading-relaxed">{form.description}</p>
                 
                 <div className="space-y-3 mb-8 text-sm text-slate-700 font-medium bg-slate-50 p-4 rounded-xl">
                   <div className="flex items-center gap-3">
                     <Clock size={18} className="text-accent" aria-hidden="true" />
-                    <span>Durée : {form.duration}</span>
+                    <span>Durée : {form.duree}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <UsersIcon size={18} className="text-accent" aria-hidden="true" />
-                    <span>Public : {form.audience}</span>
+                    <span>Public : {form.public_cible}</span>
                   </div>
                 </div>
                 
                 <Link 
                   href={`/contact?subject=Inscription formation ${form.id}`} 
-                  aria-label={`Demander le programme – ${form.title}`}
+                  aria-label={`Demander le programme – ${form.titre}`}
                   className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all text-sm font-bold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                 >
                   Demander le programme <BookOpen size={18} aria-hidden="true" />

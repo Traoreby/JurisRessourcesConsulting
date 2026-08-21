@@ -22,34 +22,40 @@ export interface Article {
 }
 
 // ---- Formations ----
-export type FormationStatut = "actif" | "inactif";
+export type FormationStatut = "actif" | "inactif" | "brouillon";
 
 export interface Formation {
   id: string;
   titre: string;
+  slug: string;
   description: string;
   duree: string;
-  publicCible: string;
+  public_cible: string;
   contenu: string;
   image?: string;
+  categorie: string;
   statut: FormationStatut;
   ordre: number;
-  createdAt: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 // ---- Services ----
-export type ServiceStatut = "publie" | "masque";
+export type ServiceStatut = "publie" | "brouillon";
 
 export interface Service {
   id: string;
   titre: string;
+  slug: string;
   description: string;
   icone?: string;
   categorie: string;
   contenu: string;
+  prestations: string[];
   ordre: number;
   statut: ServiceStatut;
-  createdAt: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 // ---- Partenaires ----
@@ -60,10 +66,11 @@ export interface Partner {
   nom: string;
   logo?: string;
   description?: string;
-  siteWeb?: string;
+  site_web?: string;
   statut: PartnerStatut;
   ordre: number;
-  createdAt: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 // ---- Actualités ----
@@ -72,28 +79,33 @@ export type ActualiteStatut = "publie" | "brouillon";
 export interface Actualite {
   id: string;
   titre: string;
+  slug: string;
+  extrait?: string;
+  auteur?: string;
   contenu: string;
   image?: string;
   categorie: string;
   date: string;
   statut: ActualiteStatut;
-  createdAt: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 // ---- Publicités / Annonces ----
-export type PubliciteStatut = "actif" | "inactif";
+export type PubliciteStatut = "actif" | "inactif" | "brouillon";
 
 export interface Publicite {
   id: string;
   titre: string;
   texte: string;
   image?: string;
-  texteBouton?: string;
-  urlBouton?: string;
-  dateDebut?: string;
-  dateFin?: string;
+  texte_bouton?: string;
+  url_bouton?: string;
+  date_debut?: string;
+  date_fin?: string;
   statut: PubliciteStatut;
-  createdAt: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 // ---- Demandes (Contact + Consultation) ----

@@ -5,16 +5,27 @@ import Image from "next/image";
 import { ArrowRight, Scale, Calculator, Landmark, Users, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 
-type Partner = {
-  name: string;
-  logo: string;
-  description?: string;
-  url?: string;
-};
-
-const partners: Partner[] = [];
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Home() {
+  const [partners, setPartners] = useState<any[]>([]);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchPartners = async () => {
+      const { data } = await supabase
+        .from('partners')
+        .select('*')
+        .eq('statut', 'actif')
+        .order('ordre', { ascending: true });
+        
+      if (data) {
+        setPartners(data);
+      }
+    };
+    fetchPartners();
+  }, [supabase]);
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -231,7 +242,48 @@ export default function Home() {
             </motion.div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {/* Grille des partenaires à venir */}
+              {partners.map((partner) => (
+                <motion.div
+                  key={partner.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow flex flex-col items-center justify-center text-center gap-4 h-full"
+                >
+                  {partner.logo ? (
+                    <div className="relative w-full aspect-[3/2] flex items-center justify-center">
+                      <Image 
+                        src={partner.logo} 
+                        alt={`Logo de ${partner.nom}`}
+                        fill
+                        className="object-contain"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 font-bold text-xl">
+                      {partner.nom.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="font-bold text-primary mb-1">{partner.nom}</h4>
+                    {partner.description && (
+                      <p className="text-xs text-slate-500 line-clamp-2">{partner.description}</p>
+                    )}
+                  </div>
+                  {partner.site_web && (
+                    <a 
+                      href={partner.site_web} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold text-accent hover:text-primary transition-colors mt-auto pt-2"
+                    >
+                      Visiter le site
+                    </a>
+                  )}
+                </motion.div>
+              ))}
             </div>
           )}
         </div>

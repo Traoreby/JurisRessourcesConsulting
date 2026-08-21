@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { Scale, Calculator, Receipt, Users, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import * as LucideIcons from "lucide-react";
 
 const services = [
   {
@@ -60,6 +63,33 @@ const services = [
 ];
 
 export default function ServicesPage() {
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('statut', 'publie')
+        .order('ordre', { ascending: true });
+        
+      if (data) {
+        setServices(data);
+      }
+      setLoading(false);
+    };
+    
+    fetchServices();
+  }, [supabase]);
+
+  // Helper to render icon component dynamically
+  const renderIcon = (iconName: string) => {
+    // @ts-ignore
+    const IconComponent = LucideIcons[iconName] || LucideIcons.Circle;
+    return <IconComponent size={64} className="text-accent mb-6 relative z-10" />;
+  };
   return (
     <div className="py-20 bg-background min-h-screen">
       <div className="container mx-auto px-4 max-w-5xl">
@@ -81,7 +111,11 @@ export default function ServicesPage() {
 
         {/* Services */}
         <div className="space-y-16">
-          {services.map((service, index) => (
+          {loading ? (
+            <div className="text-center py-20 text-slate-500">Chargement des services...</div>
+          ) : services.length === 0 ? (
+            <div className="text-center py-20 text-slate-500">Aucun service disponible pour le moment.</div>
+          ) : services.map((service, index) => (
             <motion.div
               key={service.id}
               id={service.id}
@@ -98,11 +132,11 @@ export default function ServicesPage() {
                 }`}
               >
                 <div className="absolute inset-0 bg-accent/5 transform scale-150 rotate-45 group-hover:rotate-90 transition-transform duration-1000" />
-                <service.icon size={64} className="text-accent mb-6 relative z-10" />
-                <h2 className="text-3xl font-bold mb-6 relative z-10">{service.title}</h2>
+                {renderIcon(service.icone)}
+                <h2 className="text-3xl font-bold mb-6 relative z-10">{service.titre}</h2>
                 <Link
                   href="/consultation"
-                  aria-label={service.ariaLabel}
+                  aria-label={`Demander une consultation pour ${service.titre}`}
                   className="mt-4 px-8 py-3 bg-transparent border-2 border-accent text-accent hover:bg-accent hover:text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-primary transition-colors font-bold rounded-lg relative z-10"
                 >
                   Consulter
@@ -111,12 +145,12 @@ export default function ServicesPage() {
 
               {/* Panneau texte */}
               <div className="md:w-3/5 p-10 md:p-14">
-                <p className="text-slate-600 text-xl mb-10 leading-relaxed">{service.desc}</p>
+                <p className="text-slate-600 text-xl mb-10 leading-relaxed">{service.description}</p>
                 <h3 className="font-bold text-primary text-lg mb-6 flex items-center gap-2">
                   <span className="w-8 h-1 bg-accent rounded-full" /> Nos prestations incluent :
                 </h3>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {service.prestations.map((prest, i) => (
+                  {(Array.isArray(service.prestations) ? service.prestations : []).map((prest: string, i: number) => (
                     <li key={i} className="flex items-start gap-3 text-slate-700 font-medium">
                       <ArrowRight size={20} className="text-accent shrink-0 mt-0.5" />
                       <span>{prest}</span>

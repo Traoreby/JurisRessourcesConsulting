@@ -5,13 +5,33 @@ import { Edit2, Trash2, Plus, AlertCircle } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 
-const mockPublicites: any[] = [];
+import { createClient } from "@/lib/supabase/client";
+import { useEffect } from "react";
+import Link from "next/link";
 
 export default function PublicitesAdminPage() {
-  const [notice, setNotice] = useState(false);
-  const showNotice = () => {
-    setNotice(true);
-    setTimeout(() => setNotice(false), 4000);
+  const [publicites, setPublicites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    fetchPublicites();
+  }, []);
+
+  const fetchPublicites = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('publicites').select('*').order('created_at', { ascending: false });
+    if (!error && data) {
+      setPublicites(data);
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette annonce ?")) {
+      await supabase.from('publicites').delete().eq('id', id);
+      fetchPublicites();
+    }
   };
 
   return (
@@ -20,24 +40,18 @@ export default function PublicitesAdminPage() {
         title="Annonces & Publicités"
         description="Gérez les promotions et annonces sur le site"
         actions={
-          <button
-            onClick={showNotice}
+          <Link
+            href="/admin/publicites/nouveau"
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
           >
             <Plus size={16} aria-hidden="true" />
             Nouvelle annonce
-          </button>
+          </Link>
         }
       />
 
       <div className="flex-1 p-4 md:p-6 space-y-6">
-        {notice && (
-          <div role="alert" className="flex items-start gap-3 bg-accent/10 border border-accent/30 rounded-xl p-4 text-sm text-primary">
-            <AlertCircle size={18} className="text-accent shrink-0 mt-0.5" aria-hidden="true" />
-            <span><strong>Fonctionnalité disponible après connexion à Supabase.</strong></span>
-          </div>
-        )}
-
+        
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -50,14 +64,16 @@ export default function PublicitesAdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {mockPublicites.length === 0 ? (
+                {loading ? (
+                  <tr><td colSpan={4} className="p-10 text-center text-slate-400">Chargement des annonces...</td></tr>
+                ) : publicites.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-slate-400 text-sm">
                       Aucune annonce active.
                     </td>
                   </tr>
                 ) : (
-                  mockPublicites.map((pub) => (
+                  publicites.map((pub) => (
                     <tr key={pub.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="p-4">
                         <p className="font-semibold text-primary">{pub.titre}</p>
@@ -70,10 +86,10 @@ export default function PublicitesAdminPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-1 justify-end">
-                          <button onClick={showNotice} className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 rounded-lg">
+                          <Link href={`/admin/publicites/${pub.id}`} className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 rounded-lg">
                             <Edit2 size={15} />
-                          </button>
-                          <button onClick={showNotice} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
+                          </Link>
+                          <button onClick={() => handleDelete(pub.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
                             <Trash2 size={15} />
                           </button>
                         </div>

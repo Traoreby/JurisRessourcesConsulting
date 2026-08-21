@@ -6,13 +6,34 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 
 // Partner list is empty as requested (no fake partners).
-const mockPartenaires: any[] = [];
+import { createClient } from "@/lib/supabase/client";
+import { useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function PartenariatsAdminPage() {
-  const [notice, setNotice] = useState(false);
-  const showNotice = () => {
-    setNotice(true);
-    setTimeout(() => setNotice(false), 4000);
+  const [partenaires, setPartenaires] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    fetchPartenaires();
+  }, []);
+
+  const fetchPartenaires = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('partners').select('*').order('ordre', { ascending: true });
+    if (!error && data) {
+      setPartenaires(data);
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce partenaire ?")) {
+      await supabase.from('partners').delete().eq('id', id);
+      fetchPartenaires();
+    }
   };
 
   return (
@@ -21,24 +42,18 @@ export default function PartenariatsAdminPage() {
         title="Partenariats"
         description="Gérez vos partenaires et collaborations"
         actions={
-          <button
-            onClick={showNotice}
+          <Link
+            href="/admin/partenariats/nouveau"
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1"
           >
             <Plus size={16} aria-hidden="true" />
             Nouveau partenaire
-          </button>
+          </Link>
         }
       />
 
       <div className="flex-1 p-4 md:p-6 space-y-6">
-        {notice && (
-          <div role="alert" className="flex items-start gap-3 bg-accent/10 border border-accent/30 rounded-xl p-4 text-sm text-primary">
-            <AlertCircle size={18} className="text-accent shrink-0 mt-0.5" aria-hidden="true" />
-            <span><strong>Fonctionnalité disponible après connexion à Supabase.</strong></span>
-          </div>
-        )}
-
+        
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -51,22 +66,24 @@ export default function PartenariatsAdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {mockPartenaires.length === 0 ? (
+                {loading ? (
+                  <tr><td colSpan={4} className="p-10 text-center text-slate-400">Chargement des partenaires...</td></tr>
+                ) : partenaires.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-slate-400 text-sm">
                       Aucun partenaire pour le moment.
                     </td>
                   </tr>
                 ) : (
-                  mockPartenaires.map((partenaire) => (
+                  partenaires.map((partenaire) => (
                     <tr key={partenaire.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="p-4">
                         <div className="flex flex-col gap-0.5">
-                          <button onClick={showNotice} className="text-slate-300 hover:text-primary transition-colors">
+                          <button  className="text-slate-300 hover:text-primary transition-colors">
                             <ArrowUp size={14} />
                           </button>
                           <span className="text-xs text-slate-400 text-center">{partenaire.ordre}</span>
-                          <button onClick={showNotice} className="text-slate-300 hover:text-primary transition-colors">
+                          <button  className="text-slate-300 hover:text-primary transition-colors">
                             <ArrowDown size={14} />
                           </button>
                         </div>
@@ -79,10 +96,10 @@ export default function PartenariatsAdminPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-1 justify-end">
-                          <button onClick={showNotice} className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 rounded-lg">
+                          <button  className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 rounded-lg">
                             <Edit2 size={15} />
                           </button>
-                          <button onClick={showNotice} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
+                          <button  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
                             <Trash2 size={15} />
                           </button>
                         </div>
