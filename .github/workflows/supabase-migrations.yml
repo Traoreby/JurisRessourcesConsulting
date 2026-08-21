@@ -3,7 +3,7 @@ name: Deploy Supabase Migrations
 on:
   push:
     branches:
-      - main # Exécute le workflow uniquement lors d'un push sur 'main'
+      - master # Exécute le workflow uniquement lors d'un push sur 'master'
   workflow_dispatch: # Permet de lancer le workflow manuellement depuis GitHub
 
 jobs:
