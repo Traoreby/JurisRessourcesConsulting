@@ -172,7 +172,7 @@ export const mockDemandes: Demande[] = [
     service: "Assistance Juridique",
     type: "consultation",
     date: "2024-12-10",
-    statut: "nouvelle",
+    statut: "nouvelle", created_at: "2024-12-10T00:00:00Z",
   },
   {
     id: "2",
@@ -185,7 +185,7 @@ export const mockDemandes: Demande[] = [
     service: "Accompagnement Comptable",
     type: "contact",
     date: "2024-12-09",
-    statut: "en_cours",
+    statut: "en_cours", created_at: "2024-12-09T00:00:00Z",
   },
   {
     id: "3",
@@ -197,7 +197,7 @@ export const mockDemandes: Demande[] = [
       "Je souhaite m'inscrire à la formation sur la maîtrise de la paie.",
     type: "contact",
     date: "2024-12-08",
-    statut: "traitee",
+    statut: "traitee", created_at: "2024-12-08T00:00:00Z",
   },
   {
     id: "4",
@@ -209,7 +209,7 @@ export const mockDemandes: Demande[] = [
     service: "Conseil Fiscal",
     type: "consultation",
     date: "2024-12-07",
-    statut: "archivee",
+    statut: "archivee", created_at: "2024-12-07T00:00:00Z",
   },
 ];
 

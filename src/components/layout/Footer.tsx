@@ -2,7 +2,10 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { Mail, Phone, MapPin } from "lucide-react";
 
+import { useSettings } from "@/components/layout/SettingsProvider";
+
 export function Footer() {
+  const settings = useSettings();
   return (
     <footer className="bg-primary text-white pt-20 pb-8">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
@@ -13,7 +16,7 @@ export function Footer() {
           </p>
           <div className="flex space-x-4">
             <a
-              href="https://www.facebook.com/share/19GSpywnZN/"
+              href={settings?.facebook || "https://www.facebook.com/share/19GSpywnZN/"}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Suivre Juris Ressources Consulting sur Facebook"
@@ -22,7 +25,7 @@ export function Footer() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
             </a>
             <a
-              href="https://www.tiktok.com/@juris.ressources?_r=1&_t=ZS-9933N6lI38b"
+              href={settings?.tiktok || "https://www.tiktok.com/@juris.ressources?_r=1&_t=ZS-9933N6lI38b"}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Suivre Juris Ressources Consulting sur TikTok"
@@ -31,7 +34,7 @@ export function Footer() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
             </a>
             <a
-              href="https://wa.me/message/T27HENDTW4LZJ1"
+              href={settings?.whatsapp || "https://wa.me/message/T27HENDTW4LZJ1"}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Contacter Juris Ressources Consulting sur WhatsApp"
@@ -71,18 +74,18 @@ export function Footer() {
           <ul className="space-y-5 text-sm text-gray-400">
             <li className="flex items-start gap-4">
               <MapPin size={20} className="text-accent shrink-0 mt-0.5" />
-              <span>Maison Mak, Grand-Bassam<br/>Derrière la pharmacie Mockey-ville</span>
+              <span>{settings?.adresse ? settings.adresse.split(",").map((line, i) => <span key={i}>{line}<br/></span>) : <>Maison Mak, Grand-Bassam<br/>Derrière la pharmacie Mockey-ville</>}</span>
             </li>
             <li className="flex items-center gap-4">
               <Phone size={20} className="text-accent shrink-0" />
               <div>
-                <a href="tel:+2252731948863" className="block hover:text-accent transition-colors">+225 27 31 94 88 63</a>
-                <a href="tel:+2250749436170" className="block hover:text-accent transition-colors">+225 07 49 43 61 70</a>
+                <a href={`tel:${settings?.telephone1 || "+2252731948863"}`} className="block hover:text-accent transition-colors">{settings?.telephone1 || "+225 27 31 94 88 63"}</a>
+                <a href={`tel:${settings?.telephone2 || "+2250749436170"}`} className="block hover:text-accent transition-colors">{settings?.telephone2 || "+225 07 49 43 61 70"}</a>
               </div>
             </li>
             <li className="flex items-center gap-4">
               <Mail size={20} className="text-accent shrink-0" />
-              <a href="mailto:info.jrcsarl@gmail.com" className="hover:text-accent transition-colors">info.jrcsarl@gmail.com</a>
+              <a href={`mailto:${settings?.email || "info.jrcsarl@gmail.com"}`} className="hover:text-accent transition-colors">{settings?.email || "info.jrcsarl@gmail.com"}</a>
             </li>
           </ul>
         </div>

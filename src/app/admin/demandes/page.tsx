@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Filter, Eye } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Filter, Eye, AlertCircle, X, Mail, Phone, Calendar as CalendarIcon, Tag, Briefcase, User } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { mockDemandes } from "@/lib/admin/mock-data";
-import type { DemandeStatut, DemandeTtype } from "@/types/admin";
+import { createClient } from "@/lib/supabase/client";
+import type { DemandeStatut, DemandeTtype, Demande } from "@/types/admin";
 
 const STATUTS: { value: DemandeStatut | "toutes"; label: string }[] = [
   { value: "toutes", label: "Toutes" },
@@ -16,11 +16,61 @@ const STATUTS: { value: DemandeStatut | "toutes"; label: string }[] = [
 ];
 
 export default function DemandesAdminPage() {
+  const [demandes, setDemandes] = useState<Demande[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statut, setStatut] = useState<DemandeStatut | "toutes">("toutes");
   const [type, setType] = useState<DemandeTtype | "tous">("tous");
+  const [selectedDemande, setSelectedDemande] = useState<Demande | null>(null);
 
-  const filtered = mockDemandes.filter((d) => {
+  const supabase = createClient();
+
+  useEffect(() => {
+    fetchDemandes();
+  }, []);
+
+  const fetchDemandes = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('demandes')
+      .select('*')
+      .order('created_at', { ascending: false });
+      
+    if (data) {
+      setDemandes(data);
+    }
+    setLoading(false);
+  };
+
+  const updateStatut = async (id: string, newStatut: DemandeStatut) => {
+    const { error } = await supabase
+      .from('demandes')
+      .update({ statut: newStatut, updated_at: new Date().toISOString() })
+      .eq('id', id);
+      
+    if (!error) {
+      fetchDemandes();
+      if (selectedDemande && selectedDemande.id === id) {
+        setSelectedDemande({ ...selectedDemande, statut: newStatut });
+      }
+    } else {
+      alert("Erreur lors de la mise à jour: " + error.message);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette demande ?")) {
+      const { error } = await supabase.from('demandes').delete().eq('id', id);
+      if (!error) {
+        setSelectedDemande(null);
+        fetchDemandes();
+      } else {
+        alert("Erreur lors de la suppression: " + error.message);
+      }
+    }
+  };
+
+  const filtered = demandes.filter((d) => {
     const matchSearch =
       d.nom.toLowerCase().includes(search.toLowerCase()) ||
       d.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -37,7 +87,7 @@ export default function DemandesAdminPage() {
         description="Gérez les formulaires de contact et demandes de consultation"
       />
 
-      <div className="flex-1 p-4 md:p-6 space-y-6">
+      <div className="flex-1 p-4 md:p-6 space-y-6 relative">
         <div className="flex flex-col md:flex-row gap-4 justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
           <div className="relative flex-1 max-w-sm">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -62,12 +112,12 @@ export default function DemandesAdminPage() {
                 <option value="consultation">Consultation</option>
               </select>
             </div>
-            <div className="flex gap-2 bg-slate-100 p-1 rounded-xl">
+            <div className="flex gap-2 bg-slate-100 p-1 rounded-xl overflow-x-auto">
               {STATUTS.map((s) => (
                 <button
                   key={s.value}
                   onClick={() => setStatut(s.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
                     statut === s.value
                       ? "bg-white text-primary shadow-sm"
                       : "text-slate-500 hover:text-primary"
@@ -93,7 +143,9 @@ export default function DemandesAdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <tr><td colSpan={5} className="p-8 text-center text-slate-400 text-sm">Chargement...</td></tr>
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-8 text-center text-slate-400 text-sm">
                       Aucune demande trouvée.
@@ -114,14 +166,14 @@ export default function DemandesAdminPage() {
                         </span>
                         <p className="text-primary truncate max-w-xs">{demande.objet ?? demande.service ?? "Sans objet"}</p>
                       </td>
-                      <td className="p-4 text-slate-500 text-xs">{demande.date}</td>
+                      <td className="p-4 text-slate-500 text-xs">{new Date(demande.created_at).toLocaleDateString()}</td>
                       <td className="p-4">
                         <StatusBadge statut={demande.statut} />
                       </td>
                       <td className="p-4">
                         <div className="flex items-center justify-end">
                           <button
-                            onClick={() => alert("Lecture de la demande disponible avec Supabase.")}
+                            onClick={() => setSelectedDemande(demande)}
                             className="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent"
                             aria-label="Voir la demande"
                           >
@@ -142,6 +194,86 @@ export default function DemandesAdminPage() {
           )}
         </div>
       </div>
+
+      {/* Modal Vue détaillée */}
+      {selectedDemande && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h2 className="text-lg font-bold text-primary flex items-center gap-3">
+                <span className={`px-2.5 py-1 rounded-md text-xs uppercase tracking-wider ${
+                  selectedDemande.type === 'consultation' ? 'bg-accent/10 text-accent' : 'bg-slate-200 text-slate-600'
+                }`}>
+                  {selectedDemande.type}
+                </span>
+                Détails de la demande
+              </h2>
+              <button 
+                onClick={() => setSelectedDemande(null)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5"><User size={12} className="inline" /> Nom</p>
+                  <p className="text-sm font-medium text-primary">{selectedDemande.nom}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5"><Mail size={12} className="inline" /> Email</p>
+                  <a href={`mailto:${selectedDemande.email}`} className="text-sm font-medium text-accent hover:underline">{selectedDemande.email}</a>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5"><Phone size={12} className="inline" /> Téléphone</p>
+                  <p className="text-sm font-medium text-primary">{selectedDemande.telephone || 'Non renseigné'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5"><CalendarIcon size={12} className="inline" /> Date</p>
+                  <p className="text-sm font-medium text-primary">{new Date(selectedDemande.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5"><Tag size={12} className="inline" /> Objet / Service</p>
+                <p className="text-base font-bold text-primary">{selectedDemande.objet ?? selectedDemande.service ?? 'Sans objet'}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1.5"><Briefcase size={12} className="inline" /> Message</p>
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                  {selectedDemande.message}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-slate-500">Modifier le statut :</span>
+                <select
+                  value={selectedDemande.statut}
+                  onChange={(e) => updateStatut(selectedDemande.id, e.target.value as DemandeStatut)}
+                  className="py-2 pl-3 pr-8 border border-slate-200 rounded-xl text-sm font-medium text-primary bg-white outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent/20"
+                >
+                  <option value="nouvelle">Nouvelle</option>
+                  <option value="en_cours">En cours</option>
+                  <option value="traitee">Traitée</option>
+                  <option value="archivee">Archivée</option>
+                </select>
+              </div>
+              
+              <button
+                onClick={() => handleDelete(selectedDemande.id)}
+                className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/20"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -123,6 +123,8 @@ export interface Demande {
   type: DemandeTtype;
   date: string;
   statut: DemandeStatut;
+  created_at: string;
+  updated_at?: string;
 }
 
 // ---- Paramètres du cabinet ----
@@ -142,10 +144,12 @@ export interface CabinetSettings {
   seoDescription?: string;
 }
 
-// ---- Utilisateur Admin ----
-export interface AdminUser {
+// ---- Utilisateur Admin (Profiles) ----
+export interface Profile {
   id: string;
   email: string;
-  nom: string;
-  role: "admin" | "editeur";
+  full_name: string;
+  role: "SUPER_ADMIN" | "ADMIN";
+  created_at?: string;
+  updated_at?: string;
 }

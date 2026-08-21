@@ -3,6 +3,7 @@
 import { ConsultationForm } from "@/components/forms/ConsultationForm";
 import { MapPin, Phone, Mail, MessageCircle, Clock } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSettings } from "@/components/layout/SettingsProvider";
 
 const WHATSAPP_URL = "https://wa.me/message/T27HENDTW4LZJ1";
 
@@ -15,6 +16,7 @@ const linkClass =
   "text-slate-600 text-sm block hover:text-accent transition-colors focus:outline-none focus:underline";
 
 export default function ContactPage() {
+  const settings = useSettings();
   return (
     <div className="py-20 bg-background min-h-screen">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -54,9 +56,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-bold text-xl mb-2 text-primary">Notre Adresse</h3>
                 <address className="not-italic text-slate-600 text-sm leading-relaxed">
-                  Maison Mak, Grand-Bassam<br />
-                  Derrière la pharmacie Mockey-ville<br />
-                  Côte d&apos;Ivoire
+                  {settings?.adresse ? settings.adresse.split(",").map((line, i) => <span key={i}>{line}<br/></span>) : <>Maison Mak, Grand-Bassam<br/>Derrière la pharmacie Mockey-ville</>}
                 </address>
               </div>
             </motion.div>
@@ -70,14 +70,14 @@ export default function ContactPage() {
                 <h3 className="font-bold text-xl mb-2 text-primary">Téléphone</h3>
                 <div className="space-y-1">
                   <a
-                    href="tel:+2252731948863"
+                    href={`tel:${settings?.telephone1 || "+2252731948863"}`}
                     aria-label="Appeler le +225 27 31 94 88 63"
                     className={linkClass}
                   >
                     +225 27 31 94 88 63
                   </a>
                   <a
-                    href="tel:+2250749436170"
+                    href={`tel:${settings?.telephone2 || "+2250749436170"}`}
                     aria-label="Appeler le +225 07 49 43 61 70"
                     className={linkClass}
                   >
@@ -95,7 +95,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-bold text-xl mb-2 text-primary">WhatsApp</h3>
                 <a
-                  href={WHATSAPP_URL}
+                  href={settings?.whatsapp || WHATSAPP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Contacter Juris Ressources Consulting sur WhatsApp"
@@ -114,7 +114,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-bold text-xl mb-2 text-primary">Email</h3>
                 <a
-                  href="mailto:info.jrcsarl@gmail.com"
+                  href={`mailto:${settings?.email || "info.jrcsarl@gmail.com"}`}
                   aria-label="Envoyer un email à Juris Ressources Consulting"
                   className={linkClass}
                 >
@@ -131,7 +131,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-bold text-xl mb-2 text-primary">Horaires d&apos;ouverture</h3>
                 <p className="text-slate-600 text-sm">Lundi – Vendredi</p>
-                <p className="text-slate-600 text-sm font-semibold">08h00 – 17h30</p>
+                <p className="text-slate-600 text-sm font-semibold">{settings?.horaires || "08h00 – 17h30"}</p>
                 <p className="text-slate-400 text-xs mt-2">
                   Réponse sous 24 à 48 heures ouvrées.
                 </p>

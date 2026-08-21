@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import * as z from "zod";
+import { createClient } from "@/lib/supabase/server";
 
 // ── Schéma de validation serveur ──────────────────────────────────────────────
 const contactSchema = z.object({
@@ -67,6 +68,38 @@ export async function POST(request: NextRequest) {
   // Honeypot : si rempli → bot détecté, réponse silencieuse
   if (_gotcha) {
     return NextResponse.json({ success: true });
+  }
+
+  
+  // ── Insertion dans Supabase ────────────────────────────────────────────────
+  const supabase = await createClient();
+  
+  // Le type dans la table est soit 'contact' soit 'consultation'
+  // On va utiliser 'consultation' si le serviceType n'est pas "autre", sinon on le déduit.
+  // Pour simplifier, on peut mapper la logique : 
+  // Dans le formulaire de contact, serviceType = "autre" par défaut, ou on choisit un type.
+  // On va définir type = "consultation" si c'est un service précis, sinon "contact".
+  const dbType = (serviceType === "autre" || !serviceType) ? "contact" : "consultation";
+  
+  const { error: dbError } = await supabase
+    .from('demandes')
+    .insert([{
+      nom: fullName,
+      telephone: phone,
+      email: email,
+      objet: subject,
+      message: message,
+      service: serviceType,
+      type: dbType,
+      statut: 'nouvelle'
+    }]);
+
+  if (dbError) {
+    console.error("[API/contact] Erreur insertion DB:", dbError);
+    return NextResponse.json(
+      { error: "Impossible d'enregistrer la demande. Veuillez réessayer." },
+      { status: 500 }
+    );
   }
 
   const resend       = new Resend(apiKey);

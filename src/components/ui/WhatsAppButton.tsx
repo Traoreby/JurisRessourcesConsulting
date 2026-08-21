@@ -1,10 +1,12 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+import { useSettings } from "@/components/layout/SettingsProvider";
 
 export function WhatsAppButton() {
-  const WHATSAPP_URL = "https://wa.me/message/T27HENDTW4LZJ1";
-  
+  const settings = useSettings();
+  const WHATSAPP_URL = settings?.whatsapp || "https://wa.me/message/T27HENDTW4LZJ1";
+    
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-center justify-center group">
       <div className="absolute right-full mr-4 bg-white text-primary text-sm font-bold px-4 py-2 rounded-lg shadow-premium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap hidden md:block">

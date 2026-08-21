@@ -1,24 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Save, AlertCircle, Phone, Mail, MapPin, Share2 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { mockSettings } from "@/lib/admin/mock-data";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ParametresAdminPage() {
   const [saved, setSaved] = useState(false);
-  const [form, setForm] = useState(mockSettings);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const [form, setForm] = useState({
+    nom: "",
+    description: "",
+    telephone1: "",
+    telephone2: "",
+    email: "",
+    adresse: "",
+    whatsapp: "",
+    facebook: "",
+    tiktok: "",
+    linkedin: "",
+    horaires: "",
+    seo_title: "",
+    seo_description: ""
+  });
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('id', true)
+      .single();
+      
+    if (data) {
+      setForm({
+        nom: data.nom || "",
+        description: data.description || "",
+        telephone1: data.telephone1 || "",
+        telephone2: data.telephone2 || "",
+        email: data.email || "",
+        adresse: data.adresse || "",
+        whatsapp: data.whatsapp || "",
+        facebook: data.facebook || "",
+        tiktok: data.tiktok || "",
+        linkedin: data.linkedin || "",
+        horaires: data.horaires || "",
+        seo_title: data.seo_title || "",
+        seo_description: data.seo_description || ""
+      });
+    } else if (error && error.code !== 'PGRST116') {
+      console.error(error);
+    }
+    setLoading(false);
+  };
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: supabase.from('settings').update(form).eq('id', 1)
-    setSaved(true);
-    setTimeout(() => setSaved(false), 4000);
+    setSaved(false);
+    setError(null);
+    
+    // Pour settings, c'est un singleton avec id = true.
+    // L'UPDATE doit se faire avec eq('id', true). S'il n'existe pas, on l'insert.
+    // Mais SuperAdmin all settings permet d'écrire.
+    const { error: upsertError } = await supabase
+      .from('settings')
+      .upsert({ id: true, ...form, updated_at: new Date().toISOString() });
+
+    if (upsertError) {
+      setError(upsertError.message);
+    } else {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    }
   };
+
+  if (loading) {
+    return <div className="p-8 text-center text-slate-500">Chargement des paramètres...</div>;
+  }
 
   return (
     <div className="flex flex-col min-h-full">
@@ -29,10 +99,19 @@ export default function ParametresAdminPage() {
 
       <div className="flex-1 p-4 md:p-6 max-w-5xl">
         {saved && (
-          <div role="alert" className="mb-6 flex items-start gap-3 bg-accent/10 border border-accent/30 rounded-xl p-4 text-sm text-primary">
-            <AlertCircle size={18} className="text-accent shrink-0 mt-0.5" aria-hidden="true" />
+          <div role="alert" className="mb-6 flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800">
+            <AlertCircle size={18} className="text-green-600 shrink-0 mt-0.5" aria-hidden="true" />
             <span>
-              <strong>Sauvegarde simulée.</strong> Les informations réelles seront mises à jour via Supabase.
+              <strong>Paramètres enregistrés.</strong> Les informations ont été mises à jour avec succès.
+            </span>
+          </div>
+        )}
+        
+        {error && (
+          <div role="alert" className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800">
+            <AlertCircle size={18} className="text-red-600 shrink-0 mt-0.5" aria-hidden="true" />
+            <span>
+              <strong>Erreur :</strong> {error}
             </span>
           </div>
         )}
@@ -51,6 +130,7 @@ export default function ParametresAdminPage() {
                   value={form.nom}
                   onChange={(e) => handleChange("nom", e.target.value)}
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm"
+                  required
                 />
               </div>
               <div className="md:col-span-2">
@@ -60,6 +140,17 @@ export default function ParametresAdminPage() {
                   value={form.description}
                   onChange={(e) => handleChange("description", e.target.value)}
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm resize-none"
+                  required
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-primary mb-1.5">Horaires d'ouverture</label>
+                <textarea
+                  rows={2}
+                  value={form.horaires}
+                  onChange={(e) => handleChange("horaires", e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm resize-none"
+                  placeholder="Ex: Lundi - Vendredi : 08h00 - 17h30"
                 />
               </div>
             </div>
@@ -80,6 +171,7 @@ export default function ParametresAdminPage() {
                   value={form.telephone1}
                   onChange={(e) => handleChange("telephone1", e.target.value)}
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm"
+                  required
                 />
               </div>
               <div>
@@ -102,6 +194,7 @@ export default function ParametresAdminPage() {
                   value={form.email}
                   onChange={(e) => handleChange("email", e.target.value)}
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm"
+                  required
                 />
               </div>
               <div>
@@ -111,6 +204,7 @@ export default function ParametresAdminPage() {
                   value={form.whatsapp}
                   onChange={(e) => handleChange("whatsapp", e.target.value)}
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm"
+                  required
                 />
               </div>
               <div className="md:col-span-2">
@@ -122,6 +216,7 @@ export default function ParametresAdminPage() {
                   value={form.adresse}
                   onChange={(e) => handleChange("adresse", e.target.value)}
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm"
+                  required
                 />
               </div>
             </div>

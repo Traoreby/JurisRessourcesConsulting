@@ -3,10 +3,12 @@
 import { ConsultationForm } from "@/components/forms/ConsultationForm";
 import { Phone, Mail, Clock, MapPin, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSettings } from "@/components/layout/SettingsProvider";
 
 const WHATSAPP_URL = "https://wa.me/message/T27HENDTW4LZJ1";
 
 export default function ConsultationPage() {
+  const settings = useSettings();
   return (
     <div className="py-20 bg-background min-h-screen">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -22,7 +24,7 @@ export default function ConsultationPage() {
             Consultation Personnalisée
           </h1>
           <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
-            Basé à Grand-Bassam, Côte d&apos;Ivoire, Juris Ressources Consulting vous accompagne dans vos besoins juridiques, comptables, fiscaux et en ressources humaines.
+            Basé à {settings?.adresse || "Grand-Bassam, Côte d'Ivoire"}, Juris Ressources Consulting vous accompagne dans vos besoins juridiques, comptables, fiscaux et en ressources humaines.
           </p>
         </motion.div>
 
@@ -61,10 +63,10 @@ export default function ConsultationPage() {
                   <div>
                     <p className="font-bold text-lg">Localisation</p>
                     <p className="text-slate-300 text-sm mt-2">
-                      Grand-Bassam, Côte d&apos;Ivoire
+                      {settings?.adresse || "Grand-Bassam, Côte d'Ivoire"}
                     </p>
                     <p className="text-slate-400 text-xs mt-1">
-                      Maison Mak, derrière la pharmacie Mockey-ville
+                      {""}
                     </p>
                   </div>
                 </div>
@@ -77,13 +79,13 @@ export default function ConsultationPage() {
                   <div>
                     <p className="font-bold text-lg">Téléphone</p>
                     <a
-                      href="tel:+2252731948863"
+                      href={`tel:${settings?.telephone1 || "+2252731948863"}`}
                       className="text-slate-300 text-sm mt-2 block hover:text-accent transition-colors focus:outline-none focus:underline"
                     >
                       +225 27 31 94 88 63
                     </a>
                     <a
-                      href="tel:+2250749436170"
+                      href={`tel:${settings?.telephone2 || "+2250749436170"}`}
                       className="text-slate-300 text-sm block hover:text-accent transition-colors focus:outline-none focus:underline"
                     >
                       +225 07 49 43 61 70
@@ -99,7 +101,7 @@ export default function ConsultationPage() {
                   <div>
                     <p className="font-bold text-lg">Email</p>
                     <a
-                      href="mailto:info.jrcsarl@gmail.com"
+                      href={`mailto:${settings?.email || "info.jrcsarl@gmail.com"}`}
                       className="text-slate-300 text-sm mt-2 block hover:text-accent transition-colors focus:outline-none focus:underline"
                     >
                       info.jrcsarl@gmail.com
@@ -115,7 +117,7 @@ export default function ConsultationPage() {
                   <div>
                     <p className="font-bold text-lg">WhatsApp</p>
                     <a
-                      href={WHATSAPP_URL}
+                      href={settings?.whatsapp || WHATSAPP_URL}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-slate-300 text-sm mt-2 block hover:text-accent transition-colors focus:outline-none focus:underline"
