@@ -74,7 +74,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
           >
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight leading-tight">
-              Votre partenaire stratégique pour une gestion <span className="text-accent relative inline-block">performante<svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 100 20" preserveAspectRatio="none"><path d="M0 15 Q 50 0 100 15" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/></svg></span>
+              Votre partenaire stratégique pour une gestion <span className="text-accent relative inline-block">performante<svg className="absolute -bottom-4 left-0 w-full h-4" viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0 15 Q 50 30 100 10" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round"/></svg></span>
             </h1>
           </motion.div>
           
