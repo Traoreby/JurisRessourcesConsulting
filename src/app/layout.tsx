@@ -41,11 +41,6 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "fr_FR",
       type: "website",
     },
-    icons: {
-      icon: "/logo/logo.png",
-      shortcut: "/logo/logo.png",
-      apple: "/logo/logo.png",
-    },
   };
 }
 
