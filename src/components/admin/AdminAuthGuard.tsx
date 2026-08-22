@@ -24,6 +24,18 @@ export function AdminAuthGuard({ children }: { children: ReactNode }) {
       }
 
       if (session && !isLoginPage) {
+        const requiresPasswordUpdate = session.user.user_metadata?.requires_password_update === true;
+        const isUpdatePasswordPage = pathname === "/admin/update-password";
+
+        if (requiresPasswordUpdate && !isUpdatePasswordPage) {
+          router.replace("/admin/update-password");
+          return;
+        }
+
+        if (!requiresPasswordUpdate && isUpdatePasswordPage) {
+          router.replace("/admin/dashboard");
+          return;
+        }
         // Vérifier si l'utilisateur a un profil valide
         const { data: profile, error: profileError } = await supabase
           .from("profiles")

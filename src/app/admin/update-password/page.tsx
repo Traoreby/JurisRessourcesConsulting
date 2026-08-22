@@ -32,7 +32,8 @@ export default function UpdatePasswordPage() {
     setError(null);
 
     const { error: updateError } = await supabase.auth.updateUser({
-      password: password
+      password: password,
+      data: { requires_password_update: false }
     });
 
     if (updateError) {

@@ -49,7 +49,7 @@ export async function createUser(data: any) {
   // Invite user in Auth
   const { data: userData, error: authError } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email, {
     redirectTo,
-    data: { full_name }
+    data: { full_name, requires_password_update: true }
   });
   
   if (authError) throw new Error(authError.message);
@@ -77,7 +77,8 @@ export async function resendInvitation(email: string) {
   const redirectTo = `${protocol}://${host}/auth/callback?next=/admin/update-password`;
 
   const { error } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email, {
-    redirectTo
+    redirectTo,
+    data: { requires_password_update: true }
   });
 
   if (error) throw new Error(error.message);
