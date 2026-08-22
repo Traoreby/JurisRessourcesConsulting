@@ -65,7 +65,13 @@ export default function ServicesPage() {
           ) : services.map((service, index) => (
             <motion.div
               key={service.id}
-              id={service.id}
+              id={
+                service.categorie === 'juridique' ? 'juridique' :
+                service.categorie === 'comptable' ? 'comptabilite' :
+                service.categorie === 'fiscal' ? 'fiscalite' :
+                service.categorie === 'rh' ? 'ressources-humaines' :
+                service.id
+              }
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
