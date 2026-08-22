@@ -168,6 +168,7 @@ export default function Home() {
         </div>
       </section>
 
+
       {/* Publicité (si disponible) */}
       {publicite && (
         <section className="py-20 bg-accent/5 border-y border-accent/10">
