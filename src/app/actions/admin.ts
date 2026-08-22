@@ -34,24 +34,29 @@ async function checkIsSuperAdmin() {
   return user;
 }
 
+import { headers } from "next/headers";
+
 export async function createUser(data: any) {
   await checkIsSuperAdmin();
   
-  const { email, password, full_name, role } = data;
+  const { email, full_name, role } = data;
   
-  // Create user in Auth
-  const { data: userData, error: authError } = await getSupabaseAdmin().auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { full_name }
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const redirectTo = `${protocol}://${host}/auth/callback?next=/admin/update-password`;
+
+  // Invite user in Auth
+  const { data: userData, error: authError } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email, {
+    redirectTo,
+    data: { full_name }
   });
   
   if (authError) throw new Error(authError.message);
   
   // The trigger handle_new_user automatically creates the profile with role 'ADMIN'.
   // If we need it to be 'SUPER_ADMIN', we update it.
-  if (role === 'SUPER_ADMIN') {
+  if (role === 'SUPER_ADMIN' && userData.user) {
     const { error: profileError } = await getSupabaseAdmin()
       .from('profiles')
       .update({ role: 'SUPER_ADMIN' })
@@ -61,6 +66,50 @@ export async function createUser(data: any) {
   }
   
   return { success: true };
+}
+
+export async function resendInvitation(email: string) {
+  await checkIsSuperAdmin();
+  
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const redirectTo = `${protocol}://${host}/auth/callback?next=/admin/update-password`;
+
+  const { error } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email, {
+    redirectTo
+  });
+
+  if (error) throw new Error(error.message);
+  return { success: true };
+}
+
+export async function getUsersWithStatus() {
+  await checkIsSuperAdmin();
+  
+  // 1. Fetch all profiles
+  const { data: profiles, error: profileError } = await getSupabaseAdmin()
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (profileError) throw new Error(profileError.message);
+  
+  // 2. Fetch auth users to get confirmed_at
+  const { data: authData, error: authError } = await getSupabaseAdmin().auth.admin.listUsers();
+  
+  if (authError) throw new Error(authError.message);
+  
+  // 3. Merge data
+  const usersWithStatus = profiles.map(profile => {
+    const authUser = authData.users.find(u => u.id === profile.id);
+    return {
+      ...profile,
+      confirmed_at: authUser?.confirmed_at || null
+    };
+  });
+  
+  return usersWithStatus;
 }
 
 export async function updateUser(userId: string, data: any) {

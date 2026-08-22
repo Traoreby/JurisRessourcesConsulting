@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, UserPlus, Edit2, Trash2, Shield, X, AlertCircle } from "lucide-react";
+import { Search, UserPlus, Edit2, Trash2, Shield, X, AlertCircle, Mail, CheckCircle2 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
-import { createClient } from "@/lib/supabase/client";
-import { createUser, updateUser, deleteUser } from "@/app/actions/admin";
+import { createUser, updateUser, deleteUser, getUsersWithStatus, resendInvitation } from "@/app/actions/admin";
 import type { Profile } from "@/types/admin";
 
+type ProfileWithStatus = Profile & { confirmed_at?: string | null };
+
 export default function UtilisateursAdminPage() {
-  const [users, setUsers] = useState<Profile[]>([]);
+  const [users, setUsers] = useState<ProfileWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<Partial<Profile> | null>(null);
+  const [currentUser, setCurrentUser] = useState<Partial<ProfileWithStatus> | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -26,9 +27,8 @@ export default function UtilisateursAdminPage() {
   });
   
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const supabase = createClient();
 
   useEffect(() => {
     fetchUsers();
@@ -36,21 +36,19 @@ export default function UtilisateursAdminPage() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
-      
-    if (data) {
-      setUsers(data);
-    } else {
-      console.error(error);
+    try {
+      const data = await getUsersWithStatus();
+      setUsers(data as ProfileWithStatus[]);
+    } catch (err: any) {
+      console.error(err);
+      setError("Erreur lors du chargement des utilisateurs.");
     }
     setLoading(false);
   };
 
-  const handleOpenModal = (user?: Profile) => {
+  const handleOpenModal = (user?: ProfileWithStatus) => {
     setError(null);
+    setSuccess(null);
     if (user) {
       setCurrentUser(user);
       setFormData({
@@ -71,8 +69,9 @@ export default function UtilisateursAdminPage() {
     setIsModalOpen(true);
   };
 
-  const handleOpenDelete = (user: Profile) => {
+  const handleOpenDelete = (user: ProfileWithStatus) => {
     setError(null);
+    setSuccess(null);
     setCurrentUser(user);
     setIsDeleteModalOpen(true);
   };
@@ -81,14 +80,14 @@ export default function UtilisateursAdminPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    setSuccess(null);
     
     try {
       if (currentUser?.id) {
         // Edit mode
         await updateUser(currentUser.id, formData);
       } else {
-        // Create mode
-        if (!formData.password) throw new Error("Le mot de passe est requis pour la création.");
+        // Create mode (invitation)
         await createUser(formData);
       }
       await fetchUsers();
@@ -104,6 +103,7 @@ export default function UtilisateursAdminPage() {
     if (!currentUser?.id) return;
     setIsSubmitting(true);
     setError(null);
+    setSuccess(null);
     
     try {
       await deleteUser(currentUser.id);
@@ -111,6 +111,20 @@ export default function UtilisateursAdminPage() {
       setIsDeleteModalOpen(false);
     } catch (err: any) {
       setError(err.message || "Impossible de supprimer cet utilisateur.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResendInvite = async (email: string) => {
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await resendInvitation(email);
+      setSuccess(`Invitation renvoyée à ${email}`);
+    } catch (err: any) {
+      setError(err.message || "Erreur lors de l'envoi de l'invitation.");
     } finally {
       setIsSubmitting(false);
     }
@@ -132,6 +146,19 @@ export default function UtilisateursAdminPage() {
       />
 
       <div className="flex-1 p-4 md:p-6 max-w-7xl">
+        {success && (
+          <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-xl border border-green-200 flex items-center gap-3">
+            <CheckCircle2 size={20} />
+            <span className="font-medium">{success}</span>
+          </div>
+        )}
+        {error && !isModalOpen && !isDeleteModalOpen && (
+          <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl border border-red-200 flex items-center gap-3">
+            <AlertCircle size={20} />
+            <span className="font-medium">{error}</span>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4 mb-6 justify-between items-start sm:items-center">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -158,7 +185,7 @@ export default function UtilisateursAdminPage() {
               <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-200">
                 <tr>
                   <th className="px-6 py-4">Utilisateur</th>
-                  <th className="px-6 py-4">Rôle</th>
+                  <th className="px-6 py-4">Statut & Rôle</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -185,13 +212,36 @@ export default function UtilisateursAdminPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/5 text-primary">
-                          <Shield size={12} />
-                          {user.role}
+                        <div className="flex flex-col gap-2 items-start">
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/5 text-primary">
+                            <Shield size={12} />
+                            {user.role}
+                          </div>
+                          {user.confirmed_at ? (
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+                              <CheckCircle2 size={12} />
+                              E-mail confirmé
+                            </div>
+                          ) : (
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
+                              <Mail size={12} />
+                              Invitation envoyée
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
+                          {!user.confirmed_at && (
+                            <button
+                              onClick={() => handleResendInvite(user.email)}
+                              disabled={isSubmitting}
+                              className="px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
+                              aria-label="Renvoyer l'invitation"
+                            >
+                              Renvoyer invitation
+                            </button>
+                          )}
                           <button
                             onClick={() => handleOpenModal(user)}
                             className="p-2 text-slate-400 hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
@@ -239,6 +289,14 @@ export default function UtilisateursAdminPage() {
                   <span>{error}</span>
                 </div>
               )}
+              
+              {!currentUser?.id && (
+                <div className="mb-6 p-4 bg-blue-50 text-blue-700 text-sm rounded-xl flex items-start gap-3 border border-blue-100">
+                  <Mail size={20} className="shrink-0 mt-0.5 text-blue-500" />
+                  <p>Un e-mail d'invitation sera envoyé à cette adresse. L'utilisateur devra cliquer sur le lien pour confirmer son e-mail et définir son propre mot de passe.</p>
+                </div>
+              )}
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-primary mb-1.5">Nom complet</label>
@@ -261,18 +319,21 @@ export default function UtilisateursAdminPage() {
                     className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm disabled:opacity-50"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-primary mb-1.5">
-                    {currentUser?.id ? "Nouveau mot de passe (laisser vide pour ne pas modifier)" : "Mot de passe"}
-                  </label>
-                  <input
-                    type="password"
-                    required={!currentUser?.id}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
-                  />
-                </div>
+                
+                {currentUser?.id && (
+                  <div>
+                    <label className="block text-sm font-semibold text-primary mb-1.5">
+                      Nouveau mot de passe (laisser vide pour ne pas modifier)
+                    </label>
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent text-sm"
+                    />
+                  </div>
+                )}
+                
                 <div>
                   <label className="block text-sm font-semibold text-primary mb-1.5">Rôle</label>
                   <select
@@ -299,7 +360,7 @@ export default function UtilisateursAdminPage() {
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-2.5 bg-primary text-white font-semibold text-sm rounded-xl hover:bg-primary-hover transition-colors disabled:opacity-50"
                 >
-                  {isSubmitting ? "Enregistrement..." : "Enregistrer"}
+                  {isSubmitting ? "Enregistrement..." : (currentUser?.id ? "Mettre à jour" : "Envoyer l'invitation")}
                 </button>
               </div>
             </form>
