@@ -18,14 +18,17 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = settings?.seo_description || "Cabinet d'assistance et accompagnement juridique, comptable, fiscal et en ressources humaines basé à Grand-Bassam, Côte d'Ivoire.";
   
   return {
-    metadataBase: new URL("https://jurisressources.com"),
-    title,
+    metadataBase: new URL("https://www.jrcsarl.com"),
+    title: {
+      default: title,
+      template: `%s | Juris Ressources Consulting`,
+    },
     description,
     keywords: "cabinet juridique Grand-Bassam, cabinet comptable Grand-Bassam, conseil fiscal Côte d'Ivoire, ressources humaines Côte d'Ivoire, Juris Ressources Consulting, JRC",
     openGraph: {
       title: title,
       description: description,
-      url: "https://jurisressources.com",
+      url: "https://www.jrcsarl.com",
       siteName: "Juris Ressources Consulting",
       images: [
         {

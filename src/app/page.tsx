@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function Home() {
   const [partners, setPartners] = useState<any[]>([]);
+  const [publicite, setPublicite] = useState<any | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -24,7 +25,31 @@ export default function Home() {
         setPartners(data);
       }
     };
+    
+    const fetchPublicite = async () => {
+      const { data } = await supabase
+        .from('publicites')
+        .select('*')
+        .eq('statut', 'actif');
+        
+      if (data && data.length > 0) {
+        const now = new Date();
+        const validAds = data.filter((ad) => {
+          const start = ad.date_debut ? new Date(ad.date_debut) : null;
+          const end = ad.date_fin ? new Date(ad.date_fin) : null;
+          if (start && now < start) return false;
+          if (end && now > end) return false;
+          return true;
+        });
+        if (validAds.length > 0) {
+          // On prend la première publicité valide (la plus récente par exemple)
+          setPublicite(validAds[0]);
+        }
+      }
+    };
+
     fetchPartners();
+    fetchPublicite();
   }, [supabase]);
   return (
     <div className="flex flex-col min-h-screen">
@@ -142,6 +167,50 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Publicité (si disponible) */}
+      {publicite && (
+        <section className="py-20 bg-accent/5 border-y border-accent/10">
+          <div className="container mx-auto px-4">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="bg-white rounded-3xl shadow-premium border border-slate-100 overflow-hidden flex flex-col md:flex-row items-center max-w-5xl mx-auto"
+            >
+              {publicite.image && (
+                <div className="w-full md:w-2/5 aspect-video md:aspect-auto md:h-full min-h-[300px] relative">
+                  <Image 
+                    src={publicite.image} 
+                    alt={publicite.titre}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              )}
+              <div className={`w-full p-10 md:p-14 flex flex-col justify-center ${publicite.image ? 'md:w-3/5' : 'items-center text-center'}`}>
+                <span className="text-sm font-bold uppercase tracking-widest text-accent mb-4 block">Annonce</span>
+                <h3 className="text-2xl md:text-3xl font-bold text-primary mb-4">{publicite.titre}</h3>
+                <p className="text-slate-600 mb-8 text-lg font-medium leading-relaxed">{publicite.texte}</p>
+                {publicite.texte_bouton && publicite.url_bouton && (
+                  <div>
+                    <a 
+                      href={publicite.url_bouton} 
+                      target={publicite.url_bouton.startsWith('/') ? "_self" : "_blank"} 
+                      rel="noopener noreferrer"
+                      className="inline-flex px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+                    >
+                      {publicite.texte_bouton}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* Pourquoi nous choisir */}
       <section className="py-24 bg-background">

@@ -1,66 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Scale, Calculator, Receipt, Users, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import * as LucideIcons from "lucide-react";
 
-const services = [
-  {
-    id: "juridique",
-    title: "Assistance Juridique",
-    icon: Scale,
-    desc: "Nous sécurisons vos opérations et vous accompagnons dans toutes vos démarches juridiques, de la création à la restructuration, dans le respect du cadre juridique applicable en Côte d'Ivoire et dans l'espace OHADA.",
-    prestations: [
-      "Création d'entreprises",
-      "Rédaction de contrats et actes",
-      "Secrétariat juridique",
-      "Assistance au contentieux",
-    ],
-    ariaLabel: "Demander une consultation en assistance juridique",
-  },
-  {
-    id: "comptabilite",
-    title: "Accompagnement Comptable",
-    icon: Calculator,
-    desc: "Une gestion comptable rigoureuse, conforme aux normes du référentiel SYSCOHADA, pour vous permettre de vous concentrer sur le cœur de votre métier en toute sérénité.",
-    prestations: [
-      "Tenue de la comptabilité",
-      "Établissement des états financiers",
-      "Tableaux de bord de gestion",
-      "Audit comptable",
-    ],
-    ariaLabel: "Demander une consultation en accompagnement comptable",
-  },
-  {
-    id: "fiscalite",
-    title: "Conseil Fiscal",
-    icon: Receipt,
-    desc: "Optimisation de votre charge fiscale tout en garantissant le respect strict de la réglementation fiscale ivoirienne en vigueur. Nous vous accompagnons dans vos obligations déclaratives et vos relations avec la DGI.",
-    prestations: [
-      "Déclarations fiscales",
-      "Assistance en cas de contrôle",
-      "Audit fiscal",
-      "Ingénierie fiscale",
-    ],
-    ariaLabel: "Demander une consultation en conseil fiscal",
-  },
-  {
-    id: "ressources-humaines",
-    title: "Ressources Humaines",
-    icon: Users,
-    desc: "Valorisation de votre capital humain par une gestion moderne et conforme au Code du Travail ivoirien, y compris les obligations liées aux déclarations sociales auprès de la CNPS.",
-    prestations: [
-      "Recrutement",
-      "Gestion de la paie",
-      "Rédaction des contrats de travail",
-      "Gestion des conflits sociaux",
-    ],
-    ariaLabel: "Demander une consultation en ressources humaines",
-  },
-];
+
 
 export default function ServicesPage() {
   const [services, setServices] = useState<any[]>([]);
@@ -133,7 +80,11 @@ export default function ServicesPage() {
               >
                 <div className="absolute inset-0 bg-accent/5 transform scale-150 rotate-45 group-hover:rotate-90 transition-transform duration-1000" />
                 {renderIcon(service.icone)}
-                <h2 className="text-3xl font-bold mb-6 relative z-10">{service.titre}</h2>
+                <h2 className="text-3xl font-bold mb-6 relative z-10">
+                  <Link href={`/services/${service.id}`} className="hover:text-accent transition-colors focus:outline-none focus:underline">
+                    {service.titre}
+                  </Link>
+                </h2>
                 <Link
                   href="/consultation"
                   aria-label={`Demander une consultation pour ${service.titre}`}
@@ -157,6 +108,14 @@ export default function ServicesPage() {
                     </li>
                   ))}
                 </ul>
+                <div className="mt-8 flex justify-end">
+                  <Link 
+                    href={`/services/${service.id}`}
+                    className="inline-flex items-center gap-2 text-primary font-bold hover:text-accent transition-colors group focus:outline-none focus:ring-2 focus:ring-accent rounded-lg px-3 py-2"
+                  >
+                    Détails du service <ArrowRight size={18} className="transform group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
               </div>
             </motion.div>
           ))}

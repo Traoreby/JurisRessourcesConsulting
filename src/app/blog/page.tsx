@@ -87,7 +87,7 @@ export default function BlogPage() {
               <div className="p-8 flex-grow flex flex-col">
                 <h3 className="text-2xl font-bold text-primary mb-4 leading-tight group-hover:text-accent transition-colors">
                   <Link 
-                    href={`/contact?subject=${encodeURIComponent("Question sur : " + article.titre)}`}
+                    href={`/blog/${article.id}`}
                     className="focus:outline-none focus:underline"
                   >
                     {article.titre}
@@ -100,7 +100,7 @@ export default function BlogPage() {
                 <p className="text-slate-600 text-base mb-8 flex-grow leading-relaxed">{article.extrait}</p>
                 
                 <Link 
-                  href={`/contact?subject=${encodeURIComponent("Question sur : " + article.titre)}`}
+                  href={`/blog/${article.id}`}
                   className="inline-flex items-center gap-2 text-primary font-bold text-sm hover:text-accent transition-colors mt-auto group/link focus:outline-none focus:ring-2 focus:ring-accent rounded-md px-2 py-1 -ml-2"
                 >
                   En savoir plus <ArrowRight size={18} className="transform group-hover/link:translate-x-1 transition-transform" aria-hidden="true" />

@@ -81,8 +81,15 @@ export default function FormationsPage() {
                 <span className="text-xs font-bold uppercase tracking-widest text-accent group-hover:text-white transition-colors">{form.categorie}</span>
               </div>
               <div className="p-8 flex-grow flex flex-col">
-                <h3 className="text-2xl font-bold text-primary mb-4 leading-tight">{form.titre}</h3>
-                <p className="text-slate-600 text-base mb-8 flex-grow leading-relaxed">{form.description}</p>
+                <h3 className="text-2xl font-bold text-primary mb-4 leading-tight">
+                  <Link 
+                    href={`/formations/${form.id}`}
+                    className="hover:text-accent transition-colors focus:outline-none focus:underline"
+                  >
+                    {form.titre}
+                  </Link>
+                </h3>
+                <p className="text-slate-600 text-base mb-8 flex-grow leading-relaxed line-clamp-3">{form.description}</p>
                 
                 <div className="space-y-3 mb-8 text-sm text-slate-700 font-medium bg-slate-50 p-4 rounded-xl">
                   <div className="flex items-center gap-3">
