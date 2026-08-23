@@ -114,7 +114,7 @@ export default function FormationsPage() {
                 </div>
                 
                 <Link 
-                  href={`/contact?subject=Inscription formation ${form.id}`} 
+                  href={`/contact?subject=${encodeURIComponent("Demande de programme – " + form.titre)}`}
                   aria-label={`Demander le programme – ${form.titre}`}
                   className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all text-sm font-bold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                 >

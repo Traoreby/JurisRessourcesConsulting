@@ -118,7 +118,7 @@ export default async function FormationDetailPage({ params }: { params: Promise<
                   Contactez-nous pour connaître les prochaines sessions ou organiser une formation sur mesure pour votre équipe.
                 </p>
                 <Link 
-                  href={`/contact?subject=${encodeURIComponent("Inscription formation : " + formation.titre)}`}
+                  href={`/contact?subject=${encodeURIComponent("Demande de programme – " + formation.titre)}`}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-primary font-bold rounded-xl hover:bg-white transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary"
                 >
                   Demander le programme détaillé <BookOpen size={20} />
