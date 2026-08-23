@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,14 @@ const links = [
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (path: string) => {
+    if (path === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(path);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,16 +47,25 @@ export function Navbar() {
         <Logo />
         
         <nav className="hidden lg:flex items-center gap-8">
-          {links.map((link) => (
-            <Link 
-              key={link.href} 
-              href={link.href}
-              className="text-[15px] font-semibold text-primary hover:text-accent transition-colors relative group"
-            >
-              {link.name}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-          ))}
+          {links.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link 
+                key={link.href} 
+                href={link.href}
+                className={cn(
+                  "text-[15px] font-semibold transition-colors relative group",
+                  active ? "text-accent" : "text-primary hover:text-accent"
+                )}
+              >
+                {link.name}
+                <span className={cn(
+                  "absolute -bottom-1 left-0 h-0.5 bg-accent transition-all duration-300",
+                  active ? "w-full" : "w-0 group-hover:w-full"
+                )}></span>
+              </Link>
+            );
+          })}
         </nav>
         
         <div className="hidden lg:flex items-center gap-4">
@@ -65,16 +83,22 @@ export function Navbar() {
       {isOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 border-b p-4 bg-background shadow-premium animate-in slide-in-from-top-2">
           <div className="flex flex-col space-y-2">
-            {links.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href}
-                className="text-lg font-semibold text-primary p-3 hover:bg-slate-50 hover:text-accent rounded-lg transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {links.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link 
+                  key={link.href} 
+                  href={link.href}
+                  className={cn(
+                    "text-lg font-semibold p-3 rounded-lg transition-colors",
+                    active ? "bg-slate-50 text-accent" : "text-primary hover:bg-slate-50 hover:text-accent"
+                  )}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
             <Link 
               href="/services" 
               className="px-4 py-4 mt-4 bg-primary text-white text-center rounded-lg font-bold shadow-md hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-accent"
