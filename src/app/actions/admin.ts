@@ -124,7 +124,8 @@ export async function getUsersWithStatus() {
     const authUser = authData.users.find(u => u.id === profile.id);
     return {
       ...profile,
-      confirmed_at: authUser?.confirmed_at || null
+      confirmed_at: authUser?.confirmed_at || null,
+      requires_password_update: authUser?.user_metadata?.requires_password_update
     };
   });
   

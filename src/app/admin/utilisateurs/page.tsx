@@ -6,7 +6,10 @@ import { AdminHeader } from "@/components/admin/AdminHeader";
 import { createUser, updateUser, deleteUser, getUsersWithStatus, resendInvitation } from "@/app/actions/admin";
 import type { Profile } from "@/types/admin";
 
-type ProfileWithStatus = Profile & { confirmed_at?: string | null };
+type ProfileWithStatus = Profile & { 
+  confirmed_at?: string | null;
+  requires_password_update?: boolean;
+};
 
 export default function UtilisateursAdminPage() {
   const [users, setUsers] = useState<ProfileWithStatus[]>([]);
@@ -217,7 +220,7 @@ export default function UtilisateursAdminPage() {
                             <Shield size={12} />
                             {user.role}
                           </div>
-                          {user.confirmed_at ? (
+                          {user.confirmed_at && user.requires_password_update !== true ? (
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
                               <CheckCircle2 size={12} />
                               E-mail confirmé
@@ -232,14 +235,15 @@ export default function UtilisateursAdminPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
-                          {!user.confirmed_at && (
+                          {(!user.confirmed_at || user.requires_password_update === true) && (
                             <button
                               onClick={() => handleResendInvite(user.email)}
                               disabled={isSubmitting}
                               className="px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-50"
                               aria-label="Renvoyer l'invitation"
                             >
-                              Renvoyer invitation
+                              <Mail size={14} className="inline-block mr-1.5" />
+                              Renvoyer l'invitation
                             </button>
                           )}
                           <button
