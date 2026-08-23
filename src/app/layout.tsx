@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { PublicLayoutWrapper } from "@/components/layout/PublicLayoutWrapper";
 import { SettingsProvider } from "@/components/layout/SettingsProvider";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -11,7 +11,10 @@ const inter = Inter({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const supabase = await createClient();
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  );
   const { data: settings } = await supabase.from('settings').select('*').eq('id', true).single();
 
   const title = settings?.seo_title || "Juris Ressources Consulting | Cabinet Juridique, Fiscal, Comptable & RH";
@@ -49,7 +52,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  );
   const { data: settings } = await supabase.from('settings').select('*').eq('id', true).single();
 
   return (
