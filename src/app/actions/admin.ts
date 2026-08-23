@@ -41,10 +41,19 @@ export async function createUser(data: any) {
   
   const { email, full_name, role } = data;
   
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const redirectTo = `${protocol}://${host}/auth/callback?next=/admin/update-password`;
+  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) {
+    siteUrl = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
+  } else if (process.env.NODE_ENV === 'production') {
+    siteUrl = "https://www.jrcsarl.com";
+  } else {
+    const headersList = await headers();
+    const host = headersList.get("host") || "localhost:3000";
+    const protocol = host.includes("localhost") ? "http" : "https";
+    siteUrl = `${protocol}://${host}`;
+  }
+  
+  const redirectTo = `${siteUrl}/auth/callback?next=/admin/update-password`;
 
   // Invite user in Auth
   const { data: userData, error: authError } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email, {
@@ -71,10 +80,19 @@ export async function createUser(data: any) {
 export async function resendInvitation(email: string) {
   await checkIsSuperAdmin();
   
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const redirectTo = `${protocol}://${host}/auth/callback?next=/admin/update-password`;
+  let siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) {
+    siteUrl = siteUrl.endsWith('/') ? siteUrl.slice(0, -1) : siteUrl;
+  } else if (process.env.NODE_ENV === 'production') {
+    siteUrl = "https://www.jrcsarl.com";
+  } else {
+    const headersList = await headers();
+    const host = headersList.get("host") || "localhost:3000";
+    const protocol = host.includes("localhost") ? "http" : "https";
+    siteUrl = `${protocol}://${host}`;
+  }
+
+  const redirectTo = `${siteUrl}/auth/callback?next=/admin/update-password`;
 
   const { error } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email, {
     redirectTo,
