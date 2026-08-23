@@ -57,13 +57,11 @@ export default async function FormationDetailPage({ params }: { params: Promise<
         <article className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-12">
           {formation.image && (
             <div className="relative w-full h-[300px] md:h-[450px]">
-              <Image 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
                 src={formation.image}
                 alt={formation.titre}
-                fill
-                className="object-cover"
-                priority
-                unoptimized
+                className="w-full h-full object-cover"
               />
             </div>
           )}

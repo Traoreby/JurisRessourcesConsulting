@@ -77,8 +77,19 @@ export default function FormationsPage() {
               whileHover={{ y: -10 }}
               className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col hover:shadow-premium transition-all duration-300 group"
             >
-              <div className="bg-primary/5 p-5 border-b border-slate-100 group-hover:bg-primary transition-colors duration-300">
-                <span className="text-xs font-bold uppercase tracking-widest text-accent group-hover:text-white transition-colors">{form.categorie}</span>
+              <div className="relative h-48 overflow-hidden border-b border-slate-100">
+                <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors z-10 duration-500"></div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {form.image ? (
+                  <img src={form.image} alt={form.titre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                ) : (
+                  <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400 font-bold group-hover:scale-110 transition-transform duration-700">
+                    JRC
+                  </div>
+                )}
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-primary text-xs font-bold px-3 py-1.5 rounded-lg z-20 shadow-sm uppercase tracking-widest">
+                  {form.categorie}
+                </div>
               </div>
               <div className="p-8 flex-grow flex flex-col">
                 <h3 className="text-2xl font-bold text-primary mb-4 leading-tight">
