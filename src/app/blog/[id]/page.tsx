@@ -83,8 +83,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ id:
               {article.titre}
             </h1>
             
-            <div className="prose prose-lg max-w-none text-slate-600">
-              <div dangerouslySetInnerHTML={{ __html: article.contenu.replace(/\n/g, '<br />') }} />
+            <div className="prose prose-lg max-w-none text-slate-600 whitespace-pre-line">
+              {article.contenu}
             </div>
           </div>
         </article>

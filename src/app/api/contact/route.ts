@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "crypto";
 import { Resend } from "resend";
 import * as z from "zod";
+import { createClient as createSupabaseAdminClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+
+export const runtime = "nodejs";
 
 // ── Schéma de validation serveur ──────────────────────────────────────────────
 const contactSchema = z.object({
@@ -32,6 +36,92 @@ function esc(text: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+const CONTACT_IP_RATE_LIMIT = {
+  maxRequests: 5,
+  windowSeconds: 15 * 60,
+};
+
+const CONTACT_EMAIL_RATE_LIMIT = {
+  maxRequests: 3,
+  windowSeconds: 60 * 60,
+};
+
+function getClientIp(request: NextRequest): string {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || "unknown";
+  }
+
+  return (
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+function hashRateLimitIdentifier(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function createSupabaseAdmin(): SupabaseClient {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Supabase admin environment variables are missing.");
+  }
+
+  return createSupabaseAdminClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
+async function checkRateLimit(
+  supabaseAdmin: SupabaseClient,
+  identifier: string,
+  maxRequests: number,
+  windowSeconds: number
+): Promise<boolean> {
+  const { data, error } = await supabaseAdmin.rpc("check_contact_rate_limit", {
+    p_identifier: identifier,
+    p_max_requests: maxRequests,
+    p_window_seconds: windowSeconds,
+  });
+
+  if (error) {
+    console.error("[API/contact] Erreur rate limit:", error);
+    throw new Error("Rate limit unavailable.");
+  }
+
+  return data === true;
+}
+
+async function isContactRateLimited(request: NextRequest, email: string): Promise<boolean> {
+  const supabaseAdmin = createSupabaseAdmin();
+  const ip = getClientIp(request);
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const [ipAllowed, emailAllowed] = await Promise.all([
+    checkRateLimit(
+      supabaseAdmin,
+      `contact:ip:${hashRateLimitIdentifier(ip)}`,
+      CONTACT_IP_RATE_LIMIT.maxRequests,
+      CONTACT_IP_RATE_LIMIT.windowSeconds
+    ),
+    checkRateLimit(
+      supabaseAdmin,
+      `contact:email:${hashRateLimitIdentifier(normalizedEmail)}`,
+      CONTACT_EMAIL_RATE_LIMIT.maxRequests,
+      CONTACT_EMAIL_RATE_LIMIT.windowSeconds
+    ),
+  ]);
+
+  return !ipAllowed || !emailAllowed;
 }
 
 // ── Route POST ────────────────────────────────────────────────────────────────
@@ -68,6 +158,20 @@ export async function POST(request: NextRequest) {
   // Honeypot : si rempli → bot détecté, réponse silencieuse
   if (_gotcha) {
     return NextResponse.json({ success: true });
+  }
+
+  try {
+    if (await isContactRateLimited(request, email)) {
+      return NextResponse.json(
+        { error: "Trop de demandes ont été envoyées. Veuillez réessayer plus tard." },
+        { status: 429 }
+      );
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "Service temporairement indisponible. Veuillez réessayer plus tard." },
+      { status: 500 }
+    );
   }
 
   

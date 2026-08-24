@@ -5,6 +5,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { AlertCircle } from "lucide-react";
 
+const DEFAULT_AUTH_REDIRECT = "/admin/dashboard";
+const ALLOWED_AUTH_REDIRECTS = new Set([
+  DEFAULT_AUTH_REDIRECT,
+  "/admin/update-password",
+]);
+
+function getSafeAuthRedirect(nextParam: string | null) {
+  if (!nextParam) return DEFAULT_AUTH_REDIRECT;
+  return ALLOWED_AUTH_REDIRECTS.has(nextParam) ? nextParam : DEFAULT_AUTH_REDIRECT;
+}
+
 function AuthCallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -22,7 +33,7 @@ function AuthCallbackHandler() {
         const code = searchParams.get("code");
         const token_hash = searchParams.get("token_hash");
         const type = searchParams.get("type") as any;
-        const next = searchParams.get("next") ?? "/admin/dashboard";
+        const next = getSafeAuthRedirect(searchParams.get("next"));
 
         if (token_hash && type) {
           const { error: otpError } = await supabase.auth.verifyOtp({ token_hash, type });

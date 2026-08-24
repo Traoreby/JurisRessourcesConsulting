@@ -106,7 +106,7 @@ export default async function FormationDetailPage({ params }: { params: Promise<
             
             <div className="prose prose-lg max-w-none text-slate-600 mb-12">
               <h3 className="text-2xl font-bold text-primary mb-6">Programme de la formation</h3>
-              <div dangerouslySetInnerHTML={{ __html: formation.contenu.replace(/\n/g, '<br />') }} />
+              <div className="whitespace-pre-line">{formation.contenu}</div>
             </div>
 
             <div className="bg-primary text-white p-8 md:p-10 rounded-2xl shadow-premium-hover text-center relative overflow-hidden">

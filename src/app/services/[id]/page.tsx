@@ -75,7 +75,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           
           <div className="p-8 md:p-14">
             <div className="prose prose-lg max-w-none text-slate-600 mb-12">
-              <div dangerouslySetInnerHTML={{ __html: service.contenu.replace(/\n/g, '<br />') }} />
+              <div className="whitespace-pre-line">{service.contenu}</div>
             </div>
 
             <div className="bg-slate-50 border border-slate-100 p-8 md:p-10 rounded-2xl text-center relative overflow-hidden">
