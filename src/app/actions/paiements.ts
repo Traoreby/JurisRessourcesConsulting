@@ -116,6 +116,6 @@ export async function supprimerPaiement(paiementId: string) {
 
   if (error) throw new Error(error.message);
 
-  revalidatePath(/admin/paiements);
+  revalidatePath("/admin/paiements");
   return { success: true };
 }
