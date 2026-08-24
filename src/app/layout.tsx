@@ -5,17 +5,56 @@ import { PublicLayoutWrapper } from "@/components/layout/PublicLayoutWrapper";
 import { SettingsProvider } from "@/components/layout/SettingsProvider";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
+type PublicSettings = {
+  id: boolean;
+  nom: string;
+  description: string;
+  telephone1: string;
+  telephone2?: string;
+  email: string;
+  adresse: string;
+  whatsapp: string;
+  facebook?: string;
+  tiktok?: string;
+  linkedin?: string;
+  horaires: string;
+  seo_title?: string;
+  seo_description?: string;
+};
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
+
+const PUBLIC_SETTINGS_COLUMNS = [
+  "id",
+  "nom",
+  "description",
+  "telephone1",
+  "telephone2",
+  "email",
+  "adresse",
+  "whatsapp",
+  "facebook",
+  "tiktok",
+  "linkedin",
+  "horaires",
+  "seo_title",
+  "seo_description",
+].join(", ");
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
   );
-  const { data: settings } = await supabase.from('settings').select('*').eq('id', true).single();
+  const { data } = await supabase
+    .from("public_settings" as "settings")
+    .select(PUBLIC_SETTINGS_COLUMNS)
+    .eq("id", true)
+    .single();
+  const settings = data as PublicSettings | null;
 
   const title = settings?.seo_title || "Juris Ressources Consulting | Cabinet Juridique, Fiscal, Comptable & RH";
   const description = settings?.seo_description || "Cabinet d'assistance et accompagnement juridique, comptable, fiscal et en ressources humaines basé à Grand-Bassam, Côte d'Ivoire.";
@@ -56,7 +95,12 @@ export default async function RootLayout({
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
   );
-  const { data: settings } = await supabase.from('settings').select('*').eq('id', true).single();
+  const { data } = await supabase
+    .from("public_settings" as "settings")
+    .select(PUBLIC_SETTINGS_COLUMNS)
+    .eq("id", true)
+    .single();
+  const settings = data as PublicSettings | null;
 
   return (
     <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} h-full antialiased scroll-smooth`} suppressHydrationWarning>

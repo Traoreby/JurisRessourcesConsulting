@@ -9,29 +9,29 @@ export const metadata = {
 
 export default async function PaiementsPage() {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (userError || !user) {
     redirect("/admin/login");
   }
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("role, id, full_name, email")
-    .eq("id", session.user.id)
+    .eq("id", user.id)
     .single();
 
   if (!profile) {
     redirect("/admin/login");
   }
 
-  // On récupère le paramètre wave_payment_number
-  const { data: settings } = await supabase
-    .from("settings")
-    .select("wave_payment_number")
-    .single();
+  // On récupère uniquement le numéro Wave via une fonction protégée par rôle.
+  const { data: wavePaymentNumber } = await supabase
+    .rpc("get_wave_payment_number");
 
-  const waveNumber = settings?.wave_payment_number || "Numéro non configuré";
+  const waveNumber = typeof wavePaymentNumber === "string" && wavePaymentNumber.trim()
+    ? wavePaymentNumber
+    : "Numéro non configuré";
 
   if (profile.role === "SUPER_ADMIN") {
     return <SuperAdminPaiementsView currentUserId={profile.id} waveNumber={waveNumber} />;
