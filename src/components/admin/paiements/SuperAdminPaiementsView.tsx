@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AlertTriangle, CheckCircle, Clock, Plus, Search, Check, X } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, Plus, Search, Check, X, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { validerPaiement } from "@/app/actions/paiements";
+import { validerPaiement, supprimerPaiement } from "@/app/actions/paiements";
 import { GenererEcheanceModal } from "./GenererEcheanceModal";
 
 interface Profile {
@@ -36,6 +36,7 @@ export function SuperAdminPaiementsView({ currentUserId, waveNumber }: { current
   const [filter, setFilter] = useState<string>("tous");
   const [isGenererModalOpen, setIsGenererModalOpen] = useState(false);
   const [validatingId, setValidatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const supabase = createClient();
 
@@ -88,6 +89,21 @@ export function SuperAdminPaiementsView({ currentUserId, waveNumber }: { current
       alert(err.message || "Erreur de validation");
     } finally {
       setValidatingId(null);
+    }
+  };
+
+  const handleSupprimer = async (paiementId: string) => {
+    if (!confirm("Voulez-vous vraiment supprimer ce paiement ? Cette action est irréversible.")) return;
+    
+    setDeletingId(paiementId);
+    try {
+      await supprimerPaiement(paiementId);
+      alert("Paiement supprimé avec succès");
+      await loadData();
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de la suppression");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -206,15 +222,25 @@ export function SuperAdminPaiementsView({ currentUserId, waveNumber }: { current
                         )}
                       </td>
                       <td className="py-3 px-6 text-right">
-                        {p.statut === "en_attente" && (
+                        <div className="flex justify-end gap-2">
+                          {p.statut === "en_attente" && (
+                            <button
+                              onClick={() => handleValider(p.id)}
+                              disabled={validatingId === p.id || deletingId === p.id}
+                              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-sm font-bold rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                            >
+                              {validatingId === p.id ? "..." : <><Check className="w-4 h-4" /> Valider</>}
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleValider(p.id)}
-                            disabled={validatingId === p.id}
-                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white text-sm font-bold rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                            onClick={() => handleSupprimer(p.id)}
+                            disabled={deletingId === p.id || validatingId === p.id}
+                            title="Supprimer"
+                            className="inline-flex items-center justify-center p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                           >
-                            {validatingId === p.id ? "..." : <><Check className="w-4 h-4" /> Valider</>}
+                            <Trash2 className="w-5 h-5" />
                           </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   );

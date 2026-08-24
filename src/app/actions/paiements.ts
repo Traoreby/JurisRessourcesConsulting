@@ -103,3 +103,19 @@ export async function genererEcheance(
   revalidatePath("/admin/paiements");
   return { success: true };
 }
+
+
+export async function supprimerPaiement(paiementId: string) {
+  await checkIsSuperAdmin();
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("paiements")
+    .delete()
+    .eq("id", paiementId);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath(/admin/paiements);
+  return { success: true };
+}
