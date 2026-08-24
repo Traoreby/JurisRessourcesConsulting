@@ -153,3 +153,25 @@ export interface Profile {
   created_at?: string;
   updated_at?: string;
 }
+
+
+// ---- Paiements ----
+export type PaiementStatut = "a_payer" | "en_attente" | "paye";
+
+export interface Paiement {
+  id: string;
+  admin_id: string;
+  periode: string;
+  montant: number;
+  devise: string;
+  date_echeance: string;
+  date_paiement?: string;
+  statut: PaiementStatut;
+  reference_wave?: string;
+  date_validation?: string;
+  super_admin_id?: string;
+  created_at: string;
+  updated_at?: string;
+  // Relation jointe (Profiles)
+  profiles?: Profile;
+}

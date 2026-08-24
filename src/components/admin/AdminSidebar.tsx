@@ -15,6 +15,7 @@ import {
   LogOut,
   Users,
   X,
+  Wallet,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { useAdmin } from "@/components/admin/AdminContext";
@@ -30,6 +31,7 @@ const navItems = [
   { href: "/admin/actualites", label: "Actualités", icon: Newspaper },
   { href: "/admin/publicites", label: "Publicités", icon: Megaphone },
   { href: "/admin/demandes", label: "Demandes", icon: MessageSquare },
+  { href: "/admin/paiements", label: "Paiements", icon: Wallet },
 ];
 
 const superAdminOnlyItems = [

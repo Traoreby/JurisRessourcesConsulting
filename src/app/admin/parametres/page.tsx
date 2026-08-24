@@ -23,7 +23,8 @@ export default function ParametresAdminPage() {
     linkedin: "",
     horaires: "",
     seo_title: "",
-    seo_description: ""
+    seo_description: "",
+    wave_payment_number: ""
   });
 
   const supabase = createClient();
@@ -54,7 +55,8 @@ export default function ParametresAdminPage() {
         linkedin: data.linkedin || "",
         horaires: data.horaires || "",
         seo_title: data.seo_title || "",
-        seo_description: data.seo_description || ""
+        seo_description: data.seo_description || "",
+        wave_payment_number: data.wave_payment_number || ""
       });
     } else if (error && error.code !== 'PGRST116') {
       console.error(error);
@@ -218,6 +220,28 @@ export default function ParametresAdminPage() {
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm"
                   required
                 />
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Paiements */}
+          <section className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="bg-primary/5 px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+              <h2 className="font-bold text-primary text-sm uppercase tracking-wide">Paiements</h2>
+            </div>
+            <div className="p-6">
+              <div>
+                <label className="block text-sm font-semibold text-primary mb-1.5">Numéro Wave (SUPER_ADMIN)</label>
+                <input
+                  type="text"
+                  value={form.wave_payment_number}
+                  onChange={(e) => handleChange("wave_payment_number", e.target.value)}
+                  className="w-full md:w-1/2 px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm"
+                  placeholder="+225 00 00 00 00 00"
+                />
+                <p className="text-xs text-slate-500 mt-2">
+                  Ce numéro sera affiché aux administrateurs lors de la déclaration de leurs paiements mensuels.
+                </p>
               </div>
             </div>
           </section>
