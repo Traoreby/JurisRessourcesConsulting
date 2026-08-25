@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save, AlertCircle, Upload, Image as ImageIcon } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { createClient } from "@/lib/supabase/client";
+import { ADMIN_IMAGE_UPLOAD_ACCEPT, uploadAdminImage } from "@/lib/storage/client-upload";
 import Image from "next/image";
 
 const STATUTS = [
@@ -73,18 +74,7 @@ export default function EditPublicitePage() {
       let imageUrl = pub.image;
       
       if (file) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-        const filePath = `publicites/${fileName}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('public-assets')
-          .upload(filePath, file);
-          
-        if (uploadError) throw new Error("Erreur upload: " + uploadError.message);
-        
-        const { data } = supabase.storage.from('public-assets').getPublicUrl(filePath);
-        imageUrl = data.publicUrl;
+        imageUrl = await uploadAdminImage(file, "publicites");
       }
 
       const { error: updateError } = await supabase.from('publicites').update({
@@ -207,7 +197,7 @@ export default function EditPublicitePage() {
                       <span className="text-sm">Aucune image</span>
                     </div>
                   )}
-                  <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <input type="file" accept={ADMIN_IMAGE_UPLOAD_ACCEPT} onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 </div>
               </div>
               

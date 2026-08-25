@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save, AlertCircle } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { createClient } from "@/lib/supabase/client";
+import { ADMIN_IMAGE_UPLOAD_ACCEPT, uploadAdminImage } from "@/lib/storage/client-upload";
 
 const CATEGORIES = ["Ressources Humaines", "Fiscalité", "Juridique", "Management", "Comptabilité", "Autre"];
 const STATUTS = [
@@ -76,21 +77,7 @@ export default function EditFormationPage() {
       let imageUrl = form.image;
       
       if (file) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-        const filePath = `formations/${fileName}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('public-assets')
-          .upload(filePath, file);
-          
-        if (uploadError) throw new Error("Erreur lors de l'upload de l'image");
-        
-        const { data: { publicUrl } } = supabase.storage
-          .from('public-assets')
-          .getPublicUrl(filePath);
-          
-        imageUrl = publicUrl;
+        imageUrl = await uploadAdminImage(file, "formations");
       }
       
       const { error: updateError } = await supabase.from('formations').update({
@@ -250,7 +237,7 @@ export default function EditFormationPage() {
                   <input
                     id="form-image"
                     type="file"
-                    accept="image/*"
+                    accept={ADMIN_IMAGE_UPLOAD_ACCEPT}
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl text-primary bg-slate-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/5 file:text-primary hover:file:bg-primary/10"
                   />

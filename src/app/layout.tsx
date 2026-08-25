@@ -4,6 +4,7 @@ import "./globals.css";
 import { PublicLayoutWrapper } from "@/components/layout/PublicLayoutWrapper";
 import { SettingsProvider } from "@/components/layout/SettingsProvider";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getSupabasePublicEnv } from "@/lib/env/public";
 
 type PublicSettings = {
   id: boolean;
@@ -45,10 +46,8 @@ const PUBLIC_SETTINGS_COLUMNS = [
 ].join(", ");
 
 export async function generateMetadata(): Promise<Metadata> {
-  const supabase = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-  );
+  const { supabaseUrl, supabaseAnonKey } = getSupabasePublicEnv();
+  const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
   const { data } = await supabase
     .from("public_settings" as "settings")
     .select(PUBLIC_SETTINGS_COLUMNS)
@@ -91,10 +90,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-  );
+  const { supabaseUrl, supabaseAnonKey } = getSupabasePublicEnv();
+  const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
   const { data } = await supabase
     .from("public_settings" as "settings")
     .select(PUBLIC_SETTINGS_COLUMNS)

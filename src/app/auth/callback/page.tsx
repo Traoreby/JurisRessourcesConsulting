@@ -62,13 +62,13 @@ function AuthCallbackHandler() {
           }
         }
 
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) throw new Error("Erreur de session.");
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-        if (session) {
-          const requiresPasswordUpdate = session.user.user_metadata?.requires_password_update === true;
-          
+        if (userError) throw new Error("Erreur de session.");
+
+        if (user) {
+          const requiresPasswordUpdate = user.user_metadata?.requires_password_update === true;
+
           if (requiresPasswordUpdate) {
             router.replace("/admin/update-password");
           } else {

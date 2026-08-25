@@ -14,17 +14,18 @@ export function AdminAuthGuard({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function checkAuth() {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      // getUser() valide le JWT auprès des serveurs Supabase (contrairement à getSession qui lit le cookie localement).
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
       const isLoginPage = pathname === "/admin/login";
 
-      if (!session && !isLoginPage) {
+      if ((userError || !user) && !isLoginPage) {
         router.replace("/admin/login");
         return;
       }
 
-      if (session && !isLoginPage) {
-        const requiresPasswordUpdate = session.user.user_metadata?.requires_password_update === true;
+      if (user && !isLoginPage) {
+        const requiresPasswordUpdate = user.user_metadata?.requires_password_update === true;
         const isUpdatePasswordPage = pathname === "/admin/update-password";
 
         if (requiresPasswordUpdate && !isUpdatePasswordPage) {
@@ -36,19 +37,17 @@ export function AdminAuthGuard({ children }: { children: ReactNode }) {
           router.replace("/admin/dashboard");
           return;
         }
+
         // Vérifier si l'utilisateur a un profil valide
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
+          .select("id, role")
+          .eq("id", user.id)
           .single();
-        
-        if (profileError) {
-          console.error("Profile query error:", profileError);
-        }
 
         if (!profile) {
-          setError(`Accès refusé. Votre compte utilisateur n'a pas de profil associé. Détails: ${profileError ? profileError.message : 'Aucun'}`);
+          setError("Accès refusé. Votre compte n'a pas de profil associé.");
+          if (profileError) console.error("[AdminAuthGuard] Profile query error:", profileError.message);
           setIsChecking(false);
           return;
         }
@@ -59,8 +58,10 @@ export function AdminAuthGuard({ children }: { children: ReactNode }) {
           return;
         }
 
-        const isSuperAdminRoute = pathname.startsWith("/admin/parametres") || pathname.startsWith("/admin/utilisateurs");
-        
+        const isSuperAdminRoute =
+          pathname.startsWith("/admin/parametres") ||
+          pathname.startsWith("/admin/utilisateurs");
+
         if (isSuperAdminRoute && profile.role !== "SUPER_ADMIN") {
           setError("Accès refusé. Cette section est réservée au SUPER_ADMIN.");
           setIsChecking(false);
@@ -70,7 +71,7 @@ export function AdminAuthGuard({ children }: { children: ReactNode }) {
 
       setIsChecking(false);
     }
-    
+
     checkAuth();
   }, [pathname, router]);
 
